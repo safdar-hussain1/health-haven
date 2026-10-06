@@ -4,27 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Health Haven — Hospital Management System</title>
-<meta name="description" content="A hospital management system in Java: wards, admissions, billing, payroll and dispatch, behind a layered domain model with three interfaces.">
+<meta name="description" content="A hospital management system in Java. Run its front desk live: admit a patient, try to double-book a bed, let a night pass and print the bill.">
 <meta name="author" content="Safdar Hussain">
 <meta name="google-site-verification" content="0SIEfExLTSQj1qvnHWF5A5fY58KVl2lpIEnePP9CtI0">
+<meta name="theme-color" content="#0b1530">
 <link rel="canonical" href="https://safdar-hussain1.github.io/health-haven/">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath fill='%23fff' d='M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23142145'/%3E%3Cpath fill='%23ffc95c' d='M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z'/%3E%3C/svg%3E">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Safdar Hussain">
 <meta property="og:title" content="Health Haven — Hospital Management System">
-<meta property="og:description" content="A hospital management system in Java: wards, admissions, billing, payroll and dispatch, behind a layered domain model with three interfaces.">
+<meta property="og:description" content="A hospital management system in Java. Run its front desk live: admit a patient, try to double-book a bed, let a night pass and print the bill.">
 <meta property="og:url" content="https://safdar-hussain1.github.io/health-haven/">
 <meta property="og:image" content="https://safdar-hussain1.github.io/health-haven/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The Health Haven page header: the name in large serif type, a short summary of the hospital system, tags for Java 21, SQLite, Swing, CLI and REST, and the start of the “What it does” section.">
+<meta property="og:image:alt" content="Health Haven's live demo: a hospital building at night where every lit window is an occupied room, beside the front desk that admits and discharges patients.">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Health Haven — Hospital Management System">
-<meta name="twitter:description" content="A hospital management system in Java: wards, admissions, billing, payroll and dispatch, behind a layered domain model with three interfaces.">
+<meta name="twitter:description" content="A hospital management system in Java. Run its front desk live: admit a patient, try to double-book a bed, let a night pass and print the bill.">
 <meta name="twitter:image" content="https://safdar-hussain1.github.io/health-haven/og-image.png">
-<meta name="twitter:image:alt" content="The Health Haven page header: the name in large serif type, a short summary of the hospital system, tags for Java 21, SQLite, Swing, CLI and REST, and the start of the “What it does” section.">
+<meta name="twitter:image:alt" content="Health Haven's live demo: a hospital building at night where every lit window is an occupied room, beside the front desk that admits and discharges patients.">
 
 <script type="application/ld+json">
 {
@@ -34,7 +35,7 @@
       "@type": "WebApplication",
       "name": "Health Haven",
       "url": "https://safdar-hussain1.github.io/health-haven/",
-      "description": "A hospital management system in Java: wards, admissions, billing, payroll and dispatch, behind a layered domain model with three interfaces.",
+      "description": "A hospital management system in Java. Run its front desk live: admit a patient, try to double-book a bed, let a night pass and print the bill.",
       "image": "https://safdar-hussain1.github.io/health-haven/og-image.png",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Any (runs in a web browser)",
@@ -68,763 +69,1444 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Atkinson+Hyperlegible+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
+/* ---------- tokens ---------------------------------------------------------
+   The hero is always the hospital at night, in both themes; the rest of the
+   page follows the reader's theme. Ward colours encode the ward on every floor
+   band and room card, and are never the only cue: each band carries its floor
+   number and ward name. */
 :root{
-  --surface-1:#fcfcfb; --page:#f4f4f1; --panel:#ffffff;
-  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
-  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
-  --s1:#2a78d6; --s2:#1baf7a; --s3:#eda100; --s4:#008300; --s5:#4a3aa7; --s6:#e34948;
-  --good:#0ca30c; --critical:#d03b3b;
-  --serif:'Newsreader',Georgia,serif;
-  --sans:'Inter',system-ui,-apple-system,sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sky-0:#08122b; --sky-1:#0f1d42; --sky-2:#1d3063; --sky-3:#2d4278;
+  --facade:#2a3757; --facade-hi:#344468; --facade-lo:#222d4a; --slab:#4d5f8a; --frame:#4a5b84;
+  --lamp:#ffd27a; --lamp-hot:#fff3cf; --lamp-deep:#f3ab48;
+  --w1:#2563c9; --w2:#10804f; --w3:#9b46b8; --w4:#cf3d2e;
+  --scene-ink:#f1f4fb; --scene-ink-2:#c3cde2; --scene-muted:#9aa8c6;
+
+  --paper:#f4f6fb; --card:#ffffff; --card-2:#eef2f8; --sunk:#e7ecf5;
+  --ink:#14213d; --ink-2:#46526b; --muted:#5d6880;
+  --line:#dde3ee; --line-2:#c6cfdf;
+  --accent:#ffc95c; --accent-hi:#ffd57e; --accent-ink:#14213d; --accent-edge:#e0a63a;
+  --ok:#13804a; --ok-tint:#e2f3e9; --no:#c2303b; --no-tint:#fbe8ea; --mark-bg:#fde3e3; --mark-ink:#a8202b;
+  --chart-a:#2f6bd8; --chart-b:#d9542f; --grid:#e3e8f1;
+  --focus:#1f5fd1;
+  --paper-receipt:#fffdf6; --receipt-ink:#26231c;
+
+  --sans:'Atkinson Hyperlegible Next', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono:'Atkinson Hyperlegible Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
-  :root{
-    --surface-1:#1a1a19; --page:#0d0d0d; --panel:#161615;
-    --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
-    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
-    --s1:#3987e5; --s2:#199e70; --s3:#c98500; --s4:#008300; --s5:#9085e9; --s6:#e66767;
+  :root:not([data-theme="light"]){
+    --paper:#0a1328; --card:#111c36; --card-2:#172443; --sunk:#0d1730;
+    --ink:#eef2fa; --ink-2:#b2bdd2; --muted:#8f9bb5;
+    --line:#22304f; --line-2:#33456c;
+    --ok:#4cc38a; --ok-tint:rgba(76,195,138,.13); --no:#ff7a80; --no-tint:rgba(255,107,114,.13); --mark-bg:rgba(255,107,114,.16); --mark-ink:#ff8a8f;
+    --chart-a:#5285ea; --chart-b:#e06a47; --grid:#1f2c49;
+    --focus:#ffc95c;
+    color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --surface-1:#1a1a19; --page:#0d0d0d; --panel:#161615;
-  --ink:#fff; --ink-2:#c3c2b7; --muted:#898781;
-  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
-  --s1:#3987e5; --s2:#199e70; --s3:#c98500; --s4:#008300; --s5:#9085e9; --s6:#e66767;
+  --paper:#0a1328; --card:#111c36; --card-2:#172443; --sunk:#0d1730;
+  --ink:#eef2fa; --ink-2:#b2bdd2; --muted:#8f9bb5;
+  --line:#22304f; --line-2:#33456c;
+  --ok:#4cc38a; --ok-tint:rgba(76,195,138,.13); --no:#ff7a80; --no-tint:rgba(255,107,114,.13); --mark-bg:rgba(255,107,114,.16); --mark-ink:#ff8a8f;
+  --chart-a:#5285ea; --chart-b:#e06a47; --grid:#1f2c49;
+  --focus:#ffc95c;
+  color-scheme:dark;
 }
-:root[data-theme="light"]{
-  --surface-1:#fcfcfb; --page:#f4f4f1; --panel:#ffffff;
-  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
-  --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,.10);
-  --s1:#2a78d6; --s2:#1baf7a; --s3:#eda100; --s4:#008300; --s5:#4a3aa7; --s6:#e34948;
+
+/* ---------- base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+@media (max-width:640px){.wrap{padding:0 16px}}
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip{position:absolute;left:16px;top:-60px;z-index:50;background:var(--accent);color:var(--accent-ink);
+  padding:10px 14px;border-radius:10px;font-weight:700;text-decoration:none}
+.skip:focus{top:12px}
+code,kbd,pre{font-family:var(--mono)}
+code{font-size:.88em}
+
+/* ---------- top bar (sits on the night sky) ---------- */
+.site{position:absolute;top:0;left:0;right:0;z-index:20;color:var(--scene-ink)}
+.bar{display:flex;align-items:center;gap:28px;height:76px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;text-decoration:none;letter-spacing:-.01em}
+.brand svg{width:30px;height:30px}
+.links{display:flex;gap:26px;margin-left:auto;font-size:15.5px}
+.links a{text-decoration:none;color:var(--scene-ink-2);padding:6px 0;border-bottom:2px solid transparent}
+.links a:hover{color:var(--scene-ink);border-bottom-color:rgba(255,210,122,.6)}
+.tools{display:flex;gap:6px}
+.icon-btn{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04);color:var(--scene-ink);cursor:pointer;text-decoration:none;transition:background .2s,border-color .2s}
+.icon-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.26)}
+.icon-btn svg{width:20px;height:20px}
+@media (max-width:860px){.links{display:none}.tools{margin-left:auto}}
+
+/* ---------- hero: the hospital at night ---------- */
+.hero{position:relative;overflow:hidden;color:var(--scene-ink);padding:108px 0 64px;
+  background:
+    radial-gradient(60% 45% at 72% 98%, rgba(255,186,120,.16), transparent 70%),
+    radial-gradient(40% 30% at 18% 8%, rgba(120,150,255,.10), transparent 70%),
+    linear-gradient(180deg, var(--sky-0) 0%, var(--sky-1) 38%, var(--sky-2) 78%, var(--sky-3) 100%)}
+.sky{position:absolute;inset:0;pointer-events:none}
+.stars{position:absolute;inset:0;width:100%;height:70%}
+@media (min-width:901px){.stars{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.18) 0 40%,#000 56%);mask-image:linear-gradient(90deg,rgba(0,0,0,.18) 0 40%,#000 56%)}}
+@media (max-width:900px){.stars{-webkit-mask-image:linear-gradient(180deg,#000 0 5%,rgba(0,0,0,.12) 7% 29%,#000 33% 60%,rgba(0,0,0,.12) 64%);
+  mask-image:linear-gradient(180deg,#000 0 5%,rgba(0,0,0,.12) 7% 29%,#000 33% 60%,rgba(0,0,0,.12) 64%)}}
+.stars circle{fill:#fff}
+.moon{position:absolute;top:4px;right:1%;width:clamp(36px,8cqw,58px);height:clamp(36px,8cqw,58px);border-radius:50%;
+  background:
+    radial-gradient(circle at 64% 60%, rgba(160,150,120,.26) 0 10%, transparent 11%),
+    radial-gradient(circle at 34% 68%, rgba(160,150,120,.2) 0 7%, transparent 8%),
+    radial-gradient(circle at 48% 32%, rgba(160,150,120,.18) 0 8%, transparent 9%),
+    radial-gradient(circle at 38% 36%, #fffbef, #f2ead4 58%, #d8cfb5 100%);
+  box-shadow:0 0 36px 6px rgba(255,243,210,.16), 0 0 140px 40px rgba(170,195,255,.08)}
+.dawn{position:absolute;inset:0;opacity:0;
+  background:linear-gradient(180deg,#6d9fd6 0%,#9cc0e6 40%,#efc79f 82%,#ffd9a6 100%)}
+.sun{position:absolute;left:50%;top:62%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,#fffbe6 0 45%,#ffe7a3 70%,rgba(255,226,150,0) 72%);
+  box-shadow:0 0 60px 20px rgba(255,226,150,.45)}
+.hero.passing .dawn{animation:dawn 2.2s ease-in-out}
+.hero.passing .sun{animation:sunarc 2.2s ease-in-out}
+.hero.passing .moon,.hero.passing .stars{animation:hide 2.2s ease-in-out}
+.hero.passing .win.on .light{animation:dim 2.2s ease-in-out}
+@keyframes dawn{0%{opacity:0}35%,62%{opacity:.92}100%{opacity:0}}
+@keyframes hide{0%{opacity:1}30%,68%{opacity:0}100%{opacity:1}}
+@keyframes dim{0%{opacity:1}35%,62%{opacity:.4}100%{opacity:1}}
+@keyframes sunarc{
+  0%{opacity:0;transform:translate(-38vw,26vh)}
+  20%{opacity:1}
+  50%{transform:translate(0,-28vh)}
+  80%{opacity:1}
+  100%{opacity:0;transform:translate(38vw,26vh)}}
+
+.hero-grid{position:relative;display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);
+  grid-template-areas:"intro figure" "desk figure";grid-template-rows:auto 1fr;column-gap:clamp(32px,5vw,72px);row-gap:26px}
+.intro{grid-area:intro}
+.hospital{grid-area:figure}
+.desk{grid-area:desk;align-self:start}
+@media (max-width:900px){
+  .hero{padding:96px 0 40px}
+  .hero-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "figure" "desk";grid-template-rows:auto}
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);
-  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
 
-header{border-bottom:1px solid var(--border);background:var(--surface-1);
-  background-image:repeating-linear-gradient(var(--grid) 0 1px,transparent 1px 28px);
-  padding:58px 0 44px}
-.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--muted);margin:0 0 14px}
-h1{font-family:var(--serif);font-weight:600;font-size:clamp(36px,5.4vw,58px);line-height:1.02;
-  margin:0 0 16px;letter-spacing:-.015em}
-.lede{font-size:18px;color:var(--ink-2);max-width:64ch;margin:0 0 20px}
-.lede b{color:var(--ink);font-weight:600}
-.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:22px}
-.chip{font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:4px 10px;border-radius:99px;
-  border:1px solid var(--border);color:var(--ink-2);background:var(--panel)}
-.links{display:flex;gap:10px;flex-wrap:wrap}
-.btn{display:inline-block;padding:9px 16px;border-radius:8px;text-decoration:none;
-  font-size:14px;font-weight:500;border:1px solid var(--border);color:var(--ink);background:var(--panel);
-  font-family:var(--sans);cursor:pointer}
-.btn.primary{background:var(--ink);color:var(--page);border-color:var(--ink)}
+h1{margin:4px 0 16px;font-size:clamp(44px,5.6vw,72px);line-height:1;font-weight:800;letter-spacing:-.035em;color:#fff7e6;
+  text-shadow:0 0 28px rgba(255,201,92,.22)}
+.lede{margin:0;font-size:clamp(17.5px,1.4vw,19px);line-height:1.55;color:var(--scene-ink-2);max-width:42ch}
+.lede strong{color:var(--scene-ink);font-weight:700}
 
-section{padding:56px 0;border-bottom:1px solid var(--border)}
-h2{font-family:var(--serif);font-weight:600;font-size:31px;margin:0 0 8px;letter-spacing:-.012em}
-.sub{color:var(--ink-2);max-width:72ch;margin:0 0 28px}
-h3{font-size:14px;font-weight:600;margin:0 0 4px}
-.note{font-size:13px;color:var(--muted);margin:0 0 14px}
-em.hl{font-style:normal;background:color-mix(in srgb,var(--s3) 26%,transparent);
-  padding:0 3px;border-radius:3px;color:var(--ink)}
+/* ---------- the building ---------- */
+.hospital{position:relative;margin:0;container-type:inline-size;align-self:start}
+.bldg{
+  --gap:clamp(5px,1.55cqw,12px);
+  --pad:clamp(8px,2.4cqw,20px);
+  --win:clamp(20px,calc((100cqw - 2*var(--pad) - 11*var(--gap)) / 12),46px);
+  --winh:calc(var(--win) * 1.2);
+  --step:calc(var(--win) + var(--gap));
+  --band:clamp(17px,3.4cqw,25px);
+  position:relative;display:flex;flex-direction:column;align-items:center;outline:none}
+.roof{position:relative;display:flex;justify-content:center;align-items:flex-end;height:calc(var(--winh) * 1.25)}
+.roof .parapet{position:absolute;bottom:0;left:0;right:0;height:7px;background:var(--slab);border-radius:2px 2px 0 0}
+.roof .tank{position:absolute;bottom:7px;left:10%;width:calc(var(--win)*.9);height:calc(var(--win)*.62);
+  background:linear-gradient(180deg,#3b4a70,#2c3858);border-radius:4px 4px 0 0}
+.roof .tank::before{content:"";position:absolute;left:12%;right:12%;top:-5px;height:5px;background:#3b4a70;border-radius:3px 3px 0 0}
+.roof .unit{position:absolute;bottom:7px;right:9%;width:calc(var(--win)*.75);height:calc(var(--win)*.38);
+  background:repeating-linear-gradient(90deg,#33416a 0 3px,#2a365a 3px 6px);border-radius:3px 3px 0 0}
+.sign{position:relative;margin-bottom:7px;width:calc(var(--win)*1.15);height:calc(var(--win)*1.15);border-radius:22%;
+  display:grid;place-items:center;background:linear-gradient(180deg,#1f3d8c,#163172);
+  box-shadow:0 0 0 2px #5f78b8 inset, 0 0 26px 6px rgba(110,160,255,.28)}
+.sign::after{content:"";width:58%;height:58%;background:#f4f8ff;
+  clip-path:polygon(35% 0,65% 0,65% 35%,100% 35%,100% 65%,65% 65%,65% 100%,35% 100%,35% 65%,0 65%,0 35%,35% 35%);
+  filter:drop-shadow(0 0 6px rgba(200,225,255,.9))}
 
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-@media(max-width:960px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.floor{position:relative;padding:calc(var(--gap) * 1.1) var(--pad) 0;
+  background:linear-gradient(180deg,var(--facade-hi) 0%,var(--facade) 55%,var(--facade-lo) 100%);
+  border-top:4px solid var(--slab)}
+.floor::before,.floor::after{content:"";position:absolute;bottom:calc(100% + 4px);height:10px;width:calc(var(--step) * var(--t,0));
+  border-top:2px solid #6577a3;
+  background:repeating-linear-gradient(90deg,rgba(130,148,190,.75) 0 2px,transparent 2px 8px)}
+.floor::before{left:0}.floor::after{right:0}
+.wins{display:flex;gap:var(--gap)}
+.band{display:flex;align-items:center;gap:8px;height:var(--band);margin:calc(var(--gap) * 1.1) calc(-1 * var(--pad)) 0;
+  padding:0 clamp(6px,1.4cqw,12px);background:var(--wc);color:#fff;font-size:clamp(10.5px,1.75cqw,13px);
+  font-weight:700;white-space:nowrap;overflow:hidden;box-shadow:0 0 18px -2px var(--wc)}
+.band .fl{display:grid;place-items:center;min-width:calc(var(--band) - 6px);height:calc(var(--band) - 6px);border-radius:4px;
+  background:rgba(255,255,255,.95);color:var(--wc);font-weight:800}
+.band .rate{margin-left:auto;font-weight:500}
+.band .short{display:none}
+@container (max-width:560px){
+  .band .rate,.band .long{display:none}
+  .band .short{display:inline}
+}
 
-/* feature cards */
-.feat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 18px 16px}
-.feat .ic{font-size:20px;line-height:1;margin-bottom:10px;display:block}
-.feat h3{font-size:15px;margin-bottom:5px}
-.feat p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+/* a window is a room */
+.win{position:relative;display:block;width:var(--win);height:var(--winh);padding:0;border:0;cursor:pointer;
+  border-radius:3px 3px 2px 2px;background:linear-gradient(165deg,#1e2b4b 0%,#131c33 58%,#18233f 100%);
+  box-shadow:inset 0 0 0 2px var(--frame), 0 0 0 0 rgba(255,190,90,0);transition:box-shadow .4s ease,transform .15s ease}
+.win .light{position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .35s ease;
+  background:radial-gradient(120% 95% at 50% 18%,var(--lamp-hot) 0%,var(--lamp) 46%,var(--lamp-deep) 100%)}
+.win.c1 .light{background:linear-gradient(90deg,rgba(176,84,40,.62) 0 21%,transparent 21%),
+  radial-gradient(120% 95% at 50% 18%,var(--lamp-hot) 0%,var(--lamp) 46%,var(--lamp-deep) 100%)}
+.win.c2 .light{background:linear-gradient(270deg,rgba(60,110,120,.55) 0 24%,transparent 24%),
+  radial-gradient(120% 95% at 50% 18%,var(--lamp-hot) 0%,var(--lamp) 46%,var(--lamp-deep) 100%)}
+.win::before{content:"";position:absolute;inset:2px;z-index:2;pointer-events:none;border-radius:2px;
+  background:linear-gradient(118deg,transparent 40%,rgba(205,220,255,.09) 49%,transparent 58%)}
+.win::after{content:"";position:absolute;z-index:2;left:2px;right:2px;top:32%;height:2px;background:var(--frame);pointer-events:none}
+.win .bed{position:absolute;z-index:1;left:9%;bottom:7%;width:82%;height:auto;overflow:visible}
+.win .bed .frame{fill:none;stroke:rgba(160,182,228,.24);stroke-width:2}
+.win .bed .who{opacity:0;transition:opacity .35s ease}
+.win.on{box-shadow:inset 0 0 0 2px #75633f, 0 0 calc(var(--win) * .55) rgba(255,186,86,.42)}
+.win.on .light{opacity:1}
+.win.on .bed .frame{stroke:rgba(110,60,14,.55)}
+.win.on .bed .who{opacity:1}
+.win .bed .who{fill:rgba(110,58,12,.58)}
+.win:hover{transform:translateY(-2px)}
+.win:focus-visible{outline:3px solid var(--lamp);outline-offset:3px}
+.win.sel{outline:3px solid #fff;outline-offset:3px;z-index:3}
+.win .tag{position:absolute;z-index:6;left:50%;bottom:calc(100% + 9px);transform:translate(-50%,4px);opacity:0;pointer-events:none;
+  background:#fff;color:#14213d;font-size:12.5px;font-weight:800;padding:3px 8px;border-radius:7px;white-space:nowrap;
+  box-shadow:0 6px 18px -6px rgba(0,0,0,.6);transition:opacity .2s,transform .2s}
+.win .tag::after{content:"";position:absolute;left:50%;top:100%;margin-left:-5px;border:5px solid transparent;border-top-color:#fff}
+.win.sel .tag{opacity:1;transform:translate(-50%,0)}
+.win.no{outline-color:#ff6b72;animation:shake .38s ease}
+.win.flick .light{animation:flick .5s linear}
+@keyframes flick{0%{opacity:0}12%{opacity:.9}20%{opacity:.15}34%{opacity:1}44%{opacity:.55}60%,100%{opacity:1}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+.bump{position:absolute;z-index:7;left:50%;top:-4px;transform:translate(-50%,0);font-size:11.5px;font-weight:800;color:#14213d;
+  background:var(--lamp);padding:1px 6px;border-radius:99px;white-space:nowrap;pointer-events:none;animation:bump 1.6s ease forwards}
+@keyframes bump{0%{opacity:0;transform:translate(-50%,6px)}15%{opacity:1;transform:translate(-50%,-6px)}75%{opacity:1;transform:translate(-50%,-14px)}100%{opacity:0;transform:translate(-50%,-20px)}}
 
-.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
-@media(max-width:960px){.tiles{grid-template-columns:repeat(2,1fr)}}
-.tile{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
-.tile .v{font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.15}
-.tile .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+/* ground floor: entrance and the emergency bay */
+.lobby{position:relative;display:grid;grid-template-columns:1fr 1.8fr;gap:var(--gap);
+  padding:0 var(--pad);border-top:4px solid var(--slab);
+  background:linear-gradient(180deg,#34466e,#2a3a5e)}
+.door,.bay{position:relative;display:flex;flex-direction:column}
+.canopy{height:var(--band);display:flex;align-items:center;justify-content:center;font-size:clamp(10px,1.7cqw,12.5px);
+  font-weight:800;color:#fff;border-radius:0 0 6px 6px;margin:0 2px;white-space:nowrap;overflow:hidden}
+.door .canopy{background:#1a2442;color:var(--scene-ink-2);font-weight:700}
+.bay .canopy{background:var(--w4);box-shadow:0 0 22px -2px rgba(207,61,46,.8)}
+.doors{flex:1;display:flex;justify-content:center;align-items:flex-end;gap:3px;padding-top:calc(var(--gap) * 1.2)}
+.doors i{display:block;width:calc(var(--win) * .82);height:calc(var(--winh) * .95);border-radius:3px 3px 0 0;
+  background:linear-gradient(180deg,#eaf3ff,#bcd3f2);box-shadow:inset 0 0 0 2px #7f95c2, 0 0 22px rgba(200,225,255,.35)}
+.slots{flex:1;display:flex;align-items:flex-end;justify-content:space-around;gap:4px;padding-top:calc(var(--gap) * 1.2)}
+.amb{position:relative;width:calc(var(--win) * 2.05);max-width:31%;padding:0;border:0;background:none;cursor:pointer;border-radius:8px}
+.amb svg{width:100%;height:auto;transition:transform 1.15s cubic-bezier(.5,0,.85,.35),opacity .45s ease .75s}
+.amb .lb{opacity:.35}
+.amb.out svg{transform:translateX(calc(var(--win) * 9));opacity:0}
+.amb.out::after{content:"";position:absolute;inset:18% 4% 6%;border:2px dashed rgba(255,255,255,.35);border-radius:8px}
+.amb.siren .lb1{animation:blink .5s steps(1) infinite}.amb.siren .lb2{animation:blink .5s steps(1) .25s infinite}
+@keyframes blink{0%{opacity:1}50%{opacity:.25}}
+.amb:hover svg{transform:translateY(-2px)}
+.amb.out:hover svg{transform:translateX(calc(var(--win) * 9))}
+.amb.sel{outline:3px solid #fff;outline-offset:3px}
+.amb:focus-visible{outline:3px solid var(--lamp);outline-offset:3px}
+.street{height:30px;margin:0 -8%;border-top:3px solid #3c4a6d;position:relative;
+  background:
+    radial-gradient(14% 160% at 25% 0%,rgba(205,228,255,.22),transparent 72%),
+    radial-gradient(24% 160% at 64% 0%,rgba(255,96,74,.16),transparent 72%),
+    linear-gradient(180deg,#141d35,#0e162b)}
+.street::after{content:"";position:absolute;left:0;right:0;top:15px;height:2px;
+  background:repeating-linear-gradient(90deg,rgba(255,214,140,.35) 0 22px,transparent 22px 44px)}
+.hospital figcaption{margin-top:16px;font-size:14.5px;line-height:1.5;color:var(--scene-muted);text-align:center;max-width:60ch;margin-left:auto;margin-right:auto}
+.key{display:inline-flex;align-items:center;gap:7px;margin-right:12px;color:var(--scene-ink-2);font-weight:700}
+.key i{display:inline-block;width:12px;height:14px;border-radius:2px;box-shadow:inset 0 0 0 2px var(--frame)}
+.key .k-on{background:var(--lamp);box-shadow:0 0 8px rgba(255,190,90,.6)}
+.key .k-off{background:#151e36}
 
-/* ward grid */
-.wardwrap{display:grid;grid-template-columns:1fr 300px;gap:20px}
-@media(max-width:960px){.wardwrap{grid-template-columns:1fr}}
-.beds{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-@media(max-width:700px){.beds{grid-template-columns:repeat(3,1fr)}}
-.bed{aspect-ratio:1.35/1;border-radius:7px;border:1px solid var(--border);cursor:pointer;
-  display:flex;flex-direction:column;justify-content:space-between;padding:7px 8px;
-  background:var(--panel);transition:transform .1s ease;position:relative;overflow:hidden;text-align:left}
-.bed:hover{transform:translateY(-2px)}
-.bed[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}
-.bed .no{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--ink)}
-.bed .st{font-size:10px;color:var(--ink-2);line-height:1.2}
-.bed .bar{position:absolute;left:0;top:0;bottom:0;width:4px}
-.bed.occupied .bar{background:var(--critical)} .bed.available .bar{background:var(--good)}
-.bed.out .bar{background:var(--muted)}
-.bed.occupied{background:color-mix(in srgb,var(--critical) 9%,var(--panel))}
-.bed.available{background:color-mix(in srgb,var(--good) 8%,var(--panel))}
-.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:13px;color:var(--ink-2)}
-.legend span{display:flex;align-items:center;gap:6px}
-.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
-.bedcard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;
-  position:sticky;top:20px;align-self:start}
-.bedcard .rm{font-family:var(--mono);font-size:22px;font-weight:500;margin-bottom:2px}
-dl.kv{margin:14px 0 0;display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:14px}
-dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
-.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;
-  font-family:var(--mono);letter-spacing:.04em;text-transform:uppercase}
-.pill.occupied{background:color-mix(in srgb,var(--critical) 16%,transparent);color:var(--critical)}
-.pill.available{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
-.pill.out{background:color-mix(in srgb,var(--muted) 18%,transparent);color:var(--muted)}
+/* ---------- the front desk ---------- */
+.desk{position:relative;background:var(--card);color:var(--ink);border-radius:22px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.06), 0 28px 70px -28px rgba(0,0,0,.75);overflow:hidden}
+.desk-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:18px 22px 0}
+.desk-head h2{margin:0;font-size:17px;font-weight:800;letter-spacing:-.005em}
+.clock{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.clock svg{width:15px;height:15px}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:14px 10px 2px;margin:0;list-style:none;
+  border-bottom:1px solid var(--line)}
+.steps li{position:relative}
+.steps li + li::before{content:"";position:absolute;z-index:0;top:21px;left:calc(-50% + 20px);width:calc(100% - 40px);height:2px;
+  border-radius:2px;background:var(--line-2)}
+.steps li.done + li::before{background:var(--ok)}
+.steps button{position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:62px;
+  padding:6px 2px 10px;border:0;border-radius:12px;background:none;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);line-height:1.15}
+.steps .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;
+  background:var(--card);color:var(--ink-2);box-shadow:inset 0 0 0 2px var(--line-2);transition:background .25s,box-shadow .25s}
+.steps button[aria-current="step"]{color:var(--ink)}
+.steps button[aria-current="step"] .n{background:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 5px rgba(255,201,92,.28)}
+.steps .done button{color:var(--ink-2)}
+.steps .done .n{background:var(--ok);color:#fff;box-shadow:none}
+.steps button:hover .n{box-shadow:inset 0 0 0 2px var(--ink-2)}
+.steps button[aria-current="step"]:hover .n{box-shadow:0 0 0 5px rgba(255,201,92,.4)}
+.steps .done button:hover .n{box-shadow:0 0 0 4px var(--ok-tint)}
+.desk-body{padding:18px 22px 22px;min-height:286px}
+.desk-body h3{margin:0 0 6px;font-size:21px;line-height:1.25;font-weight:800;letter-spacing:-.01em}
+.desk-body p{margin:0 0 14px;color:var(--ink-2);font-size:15.5px}
+.desk-body p.small{font-size:14px;color:var(--muted)}
+.desk-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid var(--line);background:var(--card-2)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:11px 18px;border-radius:13px;
+  border:1px solid transparent;cursor:pointer;font-size:15.5px;font-weight:700;line-height:1.2;text-decoration:none;
+  transition:background .18s,border-color .18s,transform .12s}
+.btn:active{transform:translateY(1px)}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent-edge);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 8px 18px -10px rgba(224,166,58,.95)}
+.btn.primary:hover{background:var(--accent-hi)}
+.btn.ghost{background:var(--card);color:var(--ink);border-color:var(--line-2)}
+.btn.ghost:hover{background:var(--card-2)}
+.btn.quiet{min-height:44px;padding:8px 12px;background:transparent;color:var(--ink-2);font-size:14.5px;border-radius:10px}
+.btn.quiet:hover{background:var(--card);color:var(--ink)}
+.textbtn{background:none;border:0;padding:10px 0;cursor:pointer;color:var(--ink-2);font-size:14.5px;font-weight:700;
+  text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:4px;min-height:44px}
+.textbtn:hover{color:var(--ink);text-decoration-color:currentColor}
 
-/* invoice */
-.invoice{font-family:var(--mono);font-size:12.5px;background:var(--surface-1);
-  border:1px solid var(--border);border-radius:10px;padding:18px 18px 14px}
-.invoice .hdr{display:flex;justify-content:space-between;border-bottom:1px dashed var(--axis);
-  padding-bottom:9px;margin-bottom:10px;font-weight:500}
-.iline{display:grid;grid-template-columns:1fr auto;gap:10px;padding:4px 0;color:var(--ink-2)}
-.iline b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
-.iline .q{color:var(--muted);font-size:11.5px}
-.itot{display:grid;grid-template-columns:1fr auto;gap:10px;padding:4px 0;
-  border-top:1px dashed var(--axis);margin-top:9px;padding-top:9px}
-.itot .due{font-weight:600;font-size:15px;color:var(--s1)}
-.legacyline{margin-top:12px;padding-top:10px;border-top:1px dashed var(--axis);
-  font-size:11.5px;color:var(--muted)}
-.legacyline b{color:var(--s6)}
+/* the patient's wristband */
+.band-tag{position:relative;display:flex;align-items:center;gap:12px;margin:2px 0 16px;padding:10px 14px 10px 10px;
+  border-radius:40px;background:linear-gradient(180deg,#fbfdff,#eef4fb);color:#14213d;
+  box-shadow:inset 0 0 0 1px #cfd9e8, 0 1px 0 rgba(255,255,255,.7)}
+.band-tag .snap{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;
+  background:#14213d;color:var(--lamp);letter-spacing:.02em}
+.band-tag .who{min-width:0;flex:1;line-height:1.3}
+.band-tag .who b{display:block;font-size:15px}
+.band-tag .who span{display:block;font-size:13.5px;color:#46526b}
+.band-tag .code{flex:none;width:56px;height:30px;border-radius:3px;opacity:.85;
+  background:repeating-linear-gradient(90deg,#14213d 0 var(--b1),transparent var(--b1) var(--b2),#14213d var(--b2) var(--b3),transparent var(--b3) var(--b4))}
+@media (max-width:380px){.band-tag .code{display:none}}
 
-/* calculator */
-.slider{width:100%;margin:6px 0 2px;accent-color:var(--s1)}
-.ctrlrow{display:flex;gap:20px;align-items:end;flex-wrap:wrap;margin-bottom:10px}
-.ctrl{flex:1;min-width:170px}
-.ctrl label{font-size:13px;font-weight:500;display:block;margin-bottom:3px}
-.ctrl .now{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
-select{font-family:var(--sans);font-size:14px;padding:6px 10px;border-radius:8px;width:100%;
-  border:1px solid var(--border);background:var(--panel);color:var(--ink)}
-.readouts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.ro{border:1px solid var(--border);border-radius:10px;padding:12px 14px}
-.ro .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.ro .val{font-size:21px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:3px}
-.ro.correct{border-left:4px solid var(--s1)} .ro.correct .val{color:var(--s1)}
-.ro.legacy{border-left:4px solid var(--s6)} .ro.legacy .val{color:var(--s6)}
-.formula{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:4px}
+.roomhead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.roomhead .chip{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:19px;background:var(--wc)}
+.roomhead h3{margin:0}
+.roomhead p{margin:0;font-size:14.5px}
+.state{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:12px}
+.state.free{background:var(--card-2);color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line-2)}
+.state.taken{background:rgba(255,201,92,.22);color:var(--ink);box-shadow:inset 0 0 0 1px var(--accent-edge)}
+.state.away{background:var(--no-tint);color:var(--no)}
+.state.ready{background:var(--ok-tint);color:var(--ok)}
+.quote{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:var(--card-2);font-size:14.5px}
+.quote div{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
+.quote dt{color:var(--ink-2)}
+.quote .qh dt{font-size:13px;font-weight:700;color:var(--muted)}
+.quote dd{margin:0;font-variant-numeric:tabular-nums;font-weight:500}
+.quote .due{border-top:1px solid var(--line-2);margin-top:6px;padding-top:8px}
+.quote .due dt,.quote .due dd{color:var(--ink);font-weight:800}
 
-/* payroll explorer */
-.paywrap{display:grid;grid-template-columns:290px 1fr;gap:20px}
-@media(max-width:960px){.paywrap{grid-template-columns:1fr}}
-.stafflist{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--panel);
-  max-height:340px;overflow-y:auto}
-.srow{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;
-  padding:9px 13px;border:0;border-bottom:1px solid var(--border);background:transparent;
-  color:var(--ink);cursor:pointer;font-family:var(--sans);font-size:13.5px;text-align:left}
-.srow:last-child{border-bottom:0}
-.srow:hover{background:color-mix(in srgb,var(--s1) 7%,transparent)}
-.srow[aria-pressed="true"]{background:color-mix(in srgb,var(--s1) 13%,transparent);font-weight:500}
-.srow .rl{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.calc{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px}
-.calcsteps{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:16px 0 6px}
-.step{border:1px solid var(--border);border-radius:9px;padding:11px 15px;min-width:120px}
-.step .sl{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.step .sv{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:2px}
-.step.total{border-color:var(--s5);background:color-mix(in srgb,var(--s5) 9%,transparent)}
-.step.total .sv{color:var(--s5)}
-.op{font-size:19px;color:var(--muted);font-family:var(--mono)}
-.codeline{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);background:var(--surface-1);
-  border:1px solid var(--border);border-radius:8px;padding:11px 13px;margin-top:16px;overflow-x:auto;white-space:pre}
-.codeline .k{color:var(--s5);font-weight:500}
+.verdict{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border-radius:14px;margin-bottom:14px}
+.verdict svg{flex:none;width:24px;height:24px;margin-top:1px}
+.verdict b{display:block;font-size:16px;line-height:1.3}
+.verdict code{display:inline-block;margin-top:5px;font-size:13.5px;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.6);color:inherit;word-break:break-word}
+.verdict.ok{background:var(--ok-tint);color:var(--ok)}
+.verdict.ok b{color:var(--ink)}
+.verdict.no{background:var(--no-tint);color:var(--no)}
+.verdict.no b{color:var(--no)}
+:root[data-theme="dark"] .verdict code{background:rgba(0,0,0,.25)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .verdict code{background:rgba(0,0,0,.25)}}
 
-/* architecture */
-.layers{display:flex;flex-direction:column;gap:7px}
-.layer{border:1px solid var(--border);border-radius:9px;padding:12px 15px;background:var(--panel);
-  display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap}
-.layer .ln{font-family:var(--mono);font-size:12.5px;font-weight:500}
-.layer .ld{font-size:12.5px;color:var(--muted);text-align:right}
-.layer.l1{border-left:4px solid var(--s1)} .layer.l2{border-left:4px solid var(--s2)}
-.layer.l3{border-left:4px solid var(--s3)} .layer.l4{border-left:4px solid var(--s5)}
-.arrow{text-align:center;color:var(--muted);font-size:12px;line-height:1;margin:-1px 0}
-ul.ticks{list-style:none;padding:0;margin:0;font-size:13.5px;color:var(--ink-2)}
-ul.ticks li{padding:6px 0 6px 22px;position:relative;border-bottom:1px solid var(--border)}
-ul.ticks li:last-child{border-bottom:0}
-ul.ticks li:before{content:"✓";position:absolute;left:0;color:var(--s4);font-weight:600}
-ul.ticks code{font-size:12px}
+/* the printed bill: mirrors Invoice.render() */
+.receipt{position:relative;margin:4px 0 16px;padding:16px 16px 26px;background:var(--paper-receipt);color:var(--receipt-ink);
+  font-family:var(--mono);font-size:12.5px;line-height:1.55;border-radius:4px 4px 0 0;
+  box-shadow:0 10px 24px -14px rgba(20,33,61,.55), inset 0 0 0 1px rgba(20,33,61,.06);
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/14px 100%;
+          mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/14px 100%;
+  animation:print 1.15s cubic-bezier(.25,.8,.25,1)}
+@keyframes print{from{clip-path:inset(0 0 100% 0);transform:translateY(-10px)}to{clip-path:inset(0 0 0 0);transform:none}}
+.receipt .r-title{font-weight:600;font-size:13px;letter-spacing:.02em}
+.receipt .r-meta{color:#6b6556}
+.receipt hr{border:0;border-top:1px dashed #b9b2a0;margin:9px 0}
+.receipt .r-line{display:grid;grid-template-columns:1fr auto;column-gap:10px}
+.receipt .r-line .q{grid-column:1;color:#6b6556}
+.receipt .r-line .t{grid-column:2;grid-row:1 / span 2;align-self:end;text-align:right}
+.receipt .r-row{display:flex;justify-content:space-between;gap:10px}
+.receipt .r-due{font-weight:600;font-size:13.5px}
+.receipt .r-due.refund{color:#0f6b3d}
+.naive{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--ink-2);margin:0 0 14px}
+.naive svg{flex:none;width:20px;height:20px;color:var(--no);margin-top:1px}
+.naive b{color:var(--no);font-weight:700;white-space:nowrap}
 
-/* terminal */
-.term{background:#12120f;border:1px solid var(--border);border-radius:10px;overflow:hidden}
-.termbar{display:flex;gap:6px;padding:9px 12px;background:#1c1c18;border-bottom:1px solid rgba(255,255,255,.08)}
-.termbar i{width:10px;height:10px;border-radius:50%;display:block}
-.term pre{margin:0;padding:14px 16px;font-family:var(--mono);font-size:12px;line-height:1.65;
-  color:#d8d6cc;overflow-x:auto}
-.term .p{color:#6fbf73} .term .c{color:#7fb3e8} .term .m{color:#8a8880}
+/* ---------- sections ---------- */
+section.page{padding:clamp(72px,9vw,120px) 0}
+.kicker{margin:0 0 10px;font-size:16px;font-weight:700;color:var(--muted)}
+h2.title{margin:0 0 14px;font-size:clamp(32px,4.2vw,50px);line-height:1.05;font-weight:800;letter-spacing:-.03em}
+.intro-p{margin:0 0 48px;font-size:clamp(17px,1.5vw,19.5px);color:var(--ink-2);max-width:62ch}
 
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:top}
-th{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500}
-td.f{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
-.tbl-scroll{overflow-x:auto}
-.bad{color:var(--s6);font-weight:500} .good-t{color:var(--s4);font-weight:500}
-@media (prefers-color-scheme:dark){.good-t{color:var(--s2)}}
-:root[data-theme="dark"] .good-t{color:var(--s2)}
+/* how it works: one admission's path, left to right */
+.flow{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(24px,3vw,44px);margin:0;padding:0;list-style:none}
+.flow::before{content:"";position:absolute;left:22px;right:22px;top:22px;height:2px;
+  background:repeating-linear-gradient(90deg,var(--line-2) 0 8px,transparent 8px 14px)}
+.flow > li{position:relative}
+.flow .num{position:relative;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:18px;
+  background:var(--paper);box-shadow:inset 0 0 0 2px var(--ink);margin-bottom:22px}
+.flow h3{margin:0 0 10px;font-size:22px;line-height:1.2;letter-spacing:-.01em}
+.flow p{margin:0 0 14px;color:var(--ink-2);font-size:16px}
+.art{height:224px;margin-bottom:22px;border-radius:18px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line);
+  display:grid;place-items:center;padding:16px;overflow:hidden}
+.art svg{width:100%;height:100%}
+#billArt{height:auto;min-height:224px}
+.art text{font-family:var(--sans);font-weight:700;fill:var(--ink)}
+.art .t-muted{fill:var(--muted);font-weight:500}
+.art .stroke{stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.art .soft{fill:var(--card-2);stroke:var(--line-2);stroke-width:1.5}
+.art .lamp{fill:var(--lamp)}
+.art .ink{fill:var(--ink)}
+.art .no-s{stroke:var(--no)}
+.art .no-f{fill:var(--no)}
+pre.snip{margin:0;padding:12px 14px;border-radius:12px;background:var(--sunk);color:var(--ink);font-size:13px;line-height:1.6;
+  white-space:pre-wrap;word-break:break-word;box-shadow:inset 0 0 0 1px var(--line)}
+pre.snip .k{color:var(--chart-a);font-weight:600}
+@media (max-width:640px){.term pre{font-size:12px}}
+pre.snip .s{color:var(--ok)}
+.mini-bill{width:100%;max-width:310px;font-size:12px;line-height:1.5;background:var(--paper-receipt);color:var(--receipt-ink);font-family:var(--mono);
+  padding:12px 14px 14px;border-radius:4px;box-shadow:0 8px 20px -14px rgba(20,33,61,.6)}
+.mini-bill .r{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:1px 0}
+.mini-bill .r > span:nth-child(2){min-width:0}
+.mini-bill .cls{font-family:var(--sans);font-size:10.5px;font-weight:800;padding:1px 5px;border-radius:5px;white-space:nowrap;width:76px;text-align:center}
+.mini-bill .r.sum{grid-template-columns:1fr auto}
+.mini-bill .cls.room{background:#dfe8fb;color:#1d4fae}
+.mini-bill .cls.extra{background:#efe1f5;color:#7a3394}
+.mini-bill hr{border:0;border-top:1px dashed #b9b2a0;margin:7px 0}
+.mini-bill .tot{font-weight:600}
+@media (max-width:960px){
+  .flow{grid-template-columns:minmax(0,1fr);gap:56px}
+  .flow::before{left:22px;right:auto;top:22px;bottom:22px;width:2px;height:auto;
+    background:repeating-linear-gradient(180deg,var(--line-2) 0 8px,transparent 8px 14px)}
+  .flow > li{padding-left:66px}
+  .flow .num{position:absolute;left:0;top:0;margin:0}
+}
 
-.shots{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:960px){.shots{grid-template-columns:1fr}}
-.shots img{width:100%;border-radius:10px;border:1px solid var(--border);display:block}
+/* why it's built this way */
+.why{background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.feature{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,4vw,56px);align-items:start}
+@media (max-width:960px){.feature{grid-template-columns:minmax(0,1fr)}}
+.feature h3{margin:0 0 10px;font-size:clamp(24px,2.4vw,30px);line-height:1.15;letter-spacing:-.015em}
+.feature p{color:var(--ink-2);margin:0 0 18px}
+.slider{margin:22px 0 18px}
+.slider label{display:flex;justify-content:space-between;gap:12px;font-weight:700;font-size:15.5px;margin-bottom:8px}
+.slider output{font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;height:44px;margin:0;background:transparent;accent-color:var(--chart-a);cursor:pointer}
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ro{padding:14px 16px;border-radius:16px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.ro .lbl{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ink-2)}
+.ro .lbl i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.ro .val{margin-top:4px;font-size:clamp(24px,2.6vw,32px);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.ro .sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.chart{position:relative;padding:18px 18px 8px;border-radius:20px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.chart-legend{display:flex;flex-wrap:wrap;gap:18px;font-size:14px;font-weight:700;color:var(--ink-2);margin:0 0 6px 4px}
+.chart-legend span{display:inline-flex;align-items:center;gap:8px}
+.chart-legend i{width:18px;height:3px;border-radius:2px;display:inline-block}
+.chart svg{width:100%;height:auto;overflow:visible;touch-action:pan-y}
+.chart .gl{stroke:var(--grid);stroke-width:1}
+.chart .zero{stroke:var(--line-2);stroke-width:1.5}
+.chart .tick{fill:var(--muted);font-size:12px;font-family:var(--sans)}
+.chart .la{stroke:var(--chart-a);stroke-width:2.5;fill:none;stroke-linecap:round}
+.chart .lb{stroke:var(--chart-b);stroke-width:2.5;fill:none;stroke-linecap:round}
+.chart .fa{fill:var(--chart-a)}.chart .fb{fill:var(--chart-b)}
+.chart .ring{stroke:var(--paper);stroke-width:2.5}
+.chart .xhair{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:3 3}
+.chart .dl{fill:var(--ink-2);font-size:12.5px;font-weight:700;font-family:var(--sans)}
+.chart-tip{position:absolute;pointer-events:none;background:var(--card);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:13px;
+  box-shadow:0 10px 26px -12px rgba(0,0,0,.45), inset 0 0 0 1px var(--line);opacity:0;transition:opacity .15s;white-space:nowrap}
+.chart-tip b{display:block;margin-bottom:2px}
+.chart-tip i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+details.table{margin-top:10px;font-size:14px;color:var(--ink-2)}
+details.table summary{cursor:pointer;font-weight:700;padding:8px 0;min-height:44px;display:flex;align-items:center}
+details.table table{border-collapse:collapse;width:100%;max-width:420px;font-variant-numeric:tabular-nums}
+details.table th,details.table td{text-align:right;padding:6px 10px;border-bottom:1px solid var(--line)}
+details.table th:first-child,details.table td:first-child{text-align:left}
 
-.chartbox{position:relative;height:250px}
-footer{padding:42px 0 64px;color:var(--muted);font-size:14px}
+.tally{margin-top:clamp(40px,5vw,64px);padding-top:clamp(28px,3vw,40px);border-top:1px solid var(--line)}
+.tally h3{margin:0 0 18px;font-size:20px}
+.bars{display:grid;gap:14px;max-width:900px}
+.barrow{display:grid;grid-template-columns:minmax(150px,230px) minmax(0,1fr);gap:16px;align-items:center}
+.barrow .bl{font-size:15px;font-weight:700;color:var(--ink-2)}
+.track{position:relative;height:24px;display:flex;align-items:center}
+.track .fill{height:24px;border-radius:0 4px 4px 0;transform-origin:left center}
+.track .v{margin-left:10px;font-weight:800;font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tally .note{margin:18px 0 0;color:var(--ink-2);max-width:70ch}
+@media (max-width:640px){.barrow{grid-template-columns:minmax(0,1fr);gap:6px}}
+
+.traps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,3vw,36px);margin-top:clamp(48px,6vw,80px)}
+@media (max-width:960px){.traps{grid-template-columns:minmax(0,1fr)}}
+.trap h4{margin:0 0 12px;font-size:19px;line-height:1.25}
+.trap pre.snip{font-size:12.5px;white-space:pre-wrap;word-break:break-word}
+.trap mark{background:var(--mark-bg);color:var(--mark-ink);border-radius:4px;padding:0 2px;font-weight:600}
+.outcome{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px;font-size:15px;color:var(--ink-2)}
+.outcome li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start}
+.outcome svg{width:20px;height:20px;margin-top:2px}
+.outcome .x{color:var(--no)}.outcome .c{color:var(--ok)}
+.outcome b{color:var(--ink)}
+.trap .textbtn{margin-top:4px}
+.audit-line{margin:clamp(36px,4vw,52px) 0 0;color:var(--muted);font-size:15px}
+.audit-line code{color:var(--ink);background:var(--sunk);padding:2px 7px;border-radius:6px}
+
+/* run it yourself */
+.run-grid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:clamp(28px,4vw,56px);align-items:start}
+@media (max-width:960px){.run-grid{grid-template-columns:minmax(0,1fr)}}
+.term{border-radius:16px;overflow:hidden;background:#0d1530;box-shadow:0 20px 50px -30px rgba(10,20,50,.8)}
+.term .tb{display:flex;gap:7px;padding:12px 14px;background:#152046}
+.term .tb i{width:11px;height:11px;border-radius:50%;background:#3a4a74}
+.term pre{margin:0;padding:16px 18px 20px;color:#dfe6f5;font-size:13px;line-height:1.75;overflow-x:auto}
+.term .p{color:var(--lamp)}.term .c{color:#8a9bc2}
+.accounts{margin:22px 0 0;padding:0;list-style:none;display:grid;gap:8px;font-size:15px;color:var(--ink-2)}
+.accounts code{color:var(--ink);background:var(--sunk);padding:2px 7px;border-radius:6px}
+.shot{margin:0}
+.shot .frame{border-radius:14px;overflow:hidden;box-shadow:0 30px 70px -36px rgba(10,20,50,.7), 0 0 0 1px var(--line)}
+.shot img{width:100%;height:auto}
+.shot figcaption{margin-top:12px;font-size:14.5px;color:var(--muted)}
+
+footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--muted);font-size:15px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:10px 28px;justify-content:space-between}
 footer a{color:var(--ink-2)}
-code{font-family:var(--mono);font-size:.9em;background:color-mix(in srgb,var(--muted) 15%,transparent);
-  padding:1px 5px;border-radius:4px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
 </style>
 </head>
 <body>
+<!-- Health Haven · built by Safdar Hussain · https://github.com/safdar-hussain1 -->
+<script>
+(() => { try { const t = localStorage.getItem('hh-theme');
+  if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
+</script>
+<a class="skip" href="#desk">Skip to the front desk</a>
 
-<header>
-  <div class="wrap">
-    <p class="eyebrow">Hospital Management System</p>
-    <h1>Health Haven</h1>
-    <p class="lede">A hospital runs on answers to small, unforgiving questions. <b>Which beds are
-      free? How long has this patient been in one? What do they owe?</b> Health Haven answers
-      them — admissions, wards, billing, payroll, ambulance dispatch and an audit trail — behind a
-      layered Java domain model, one embedded database, and three interfaces onto the same rules.
-      Everything on this page is exported by the running application.</p>
-    <div class="chips">
-      <span class="chip">Java 21</span><span class="chip">SQLite</span><span class="chip">Swing · CLI · REST</span>
-      <span class="chip">35 tests</span><span class="chip">bcrypt auth</span><span class="chip">Zero setup</span>
-    </div>
-    <div class="links">
-      <a class="btn primary" href="https://github.com/safdar-hussain1/health-haven">Source on GitHub</a>
-      <a class="btn" href="#wards">Live wards</a>
-      <a class="btn" href="#billing">Billing</a>
-      <a class="btn" href="#built">How it's built</a>
-      <button class="btn" id="themeBtn" type="button">Dark / light</button>
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#1d3a86"/><path fill="#ffc95c" d="M13 7h6v6h6v6h-6v6h-6v-6H7v-6h6z"/></svg>
+      <span>Health Haven</span>
+    </a>
+    <nav class="links" aria-label="On this page">
+      <a href="#how">How it works</a>
+      <a href="#why">Why it's built this way</a>
+      <a href="#run">Run it yourself</a>
+    </nav>
+    <div class="tools">
+      <a class="icon-btn" href="https://github.com/safdar-hussain1/health-haven" aria-label="Source code on GitHub">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
+      </a>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="i-moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/><g class="i-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg>
+      </button>
     </div>
   </div>
 </header>
 
-<section>
-  <div class="wrap">
-    <h2>What it does</h2>
-    <p class="sub">Eight capabilities, all of them driven by the same service layer — whether you
-      reach them from the desktop client, the console, or over HTTP.</p>
-    <div class="grid4">
-      <div class="feat"><span class="ic">🛏</span><h3>Admissions</h3><p>Admit a patient into a free bed, or refuse: an occupied room is rejected by the database itself, not by a hopeful flag.</p></div>
-      <div class="feat"><span class="ic">🧾</span><h3>Billing</h3><p>Nights × rate, plus procedures, pharmacy and transport, less the deposit. An over-deposit is a refund, stated as one.</p></div>
-      <div class="feat"><span class="ic">🏥</span><h3>Ward map</h3><p>Occupancy derived live from active admissions across four ward types, from the general ward to intensive care.</p></div>
-      <div class="feat"><span class="ic">👥</span><h3>Patients</h3><p>A permanent medical record number per person. Discharge closes the stay; it never deletes the patient.</p></div>
-      <div class="feat"><span class="ic">💰</span><h3>Payroll</h3><p>Each staff class computes its own pay from its own rules. Payroll sums a mixed list without asking what's in it.</p></div>
-      <div class="feat"><span class="ic">🚑</span><h3>Dispatch</h3><p>Send an ambulance and recall it. One vehicle cannot be sent to two emergencies at once.</p></div>
-      <div class="feat"><span class="ic">🔐</span><h3>Access control</h3><p>Bcrypt passwords and role permissions checked in the service layer, so a disabled button is a courtesy, not a control.</p></div>
-      <div class="feat"><span class="ic">📜</span><h3>Audit log</h3><p>Append-only. Every mutation records who did it, to what, and when. Nothing in it is ever updated or deleted.</p></div>
-    </div>
+<main>
+<section class="hero" id="top" aria-labelledby="title">
+  <div class="sky" aria-hidden="true">
+    <div class="dawn"></div>
+    <svg class="stars" id="stars" preserveAspectRatio="xMidYMid slice"></svg>
+    <div class="sun"></div>
   </div>
-</section>
 
-<section>
-  <div class="wrap">
-    <h2>The hospital, right now</h2>
-    <p class="sub">A seeded hospital — 58 patients over six months, 30 beds, 15 staff. Every figure
-      below is computed by the running application and exported to the file this page reads.
-      Nothing here is typed in by hand.</p>
-    <div class="tiles" id="tiles"></div>
-  </div>
-</section>
-
-<section id="wards">
-  <div class="wrap">
-    <h2>Every bed</h2>
-    <p class="sub">A room is occupied <em>because</em> an active admission points at it — occupancy
-      is a query, not a column somebody remembered to update. Click any bed.</p>
-    <div class="legend">
-      <span><i class="dot" style="background:var(--good)"></i> Available</span>
-      <span><i class="dot" style="background:var(--critical)"></i> Occupied</span>
-      <span><i class="dot" style="background:var(--muted)"></i> Out of service</span>
+  <div class="wrap hero-grid">
+    <div class="intro">
+      <h1 id="title">Health Haven</h1>
+      <p class="lede">A hospital management system, written in Java. It tracks every bed, admits and discharges
+        patients, prints the bill and runs the payroll. <strong>And it refuses anything that would break the
+        hospital's rules.</strong></p>
     </div>
-    <div class="wardwrap">
-      <div class="beds" id="beds"></div>
-      <aside class="bedcard" id="bedcard"></aside>
-    </div>
-  </div>
-</section>
 
-<section id="billing">
-  <div class="wrap">
-    <h2>What a stay costs</h2>
-    <p class="sub">An <code>Invoice</code> totals a list of <code>BillableItem</code>s. A room charge
-      (nights × rate) and an MRI scan are computed in completely different ways, and the invoice adds
-      them up without knowing which is which. Here is a real one the system issued.</p>
+    <figure class="hospital" id="hospital" aria-labelledby="bldgCap">
+      <div class="moon" aria-hidden="true"></div>
+      <div class="bldg" id="bldg" role="group" aria-label="The hospital: 30 rooms on four floors. Arrow keys move between rooms."></div>
+      <div class="street" aria-hidden="true"></div>
+      <figcaption id="bldgCap">
+        <span class="key"><i class="k-on"></i>Patient in the room</span><span class="key"><i class="k-off"></i>Free</span><br>
+        This is the hospital the Java app exported. The front desk runs the same rules in your browser.
+      </figcaption>
+    </figure>
 
-    <div class="grid2">
-      <div class="panel">
-        <h3>Invoice — admission #<span id="invNo"></span></h3>
-        <p class="note" id="invMeta"></p>
-        <div class="invoice" id="invoice"></div>
+    <section class="desk" id="desk" aria-labelledby="deskTitle" tabindex="-1">
+      <div class="desk-head">
+        <h2 id="deskTitle">Front desk</h2>
+        <span class="clock"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg><span id="clock"></span></span>
       </div>
+      <ol class="steps" id="steps" aria-label="Try these four things"></ol>
+      <div class="desk-body" id="deskBody">
+        <noscript><p>The front desk needs JavaScript. Everything below the hospital explains how it works.</p></noscript>
+      </div>
+      <div class="desk-foot">
+        <button class="btn quiet" type="button" data-act="tour">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>Watch it run</button>
+        <button class="btn quiet" type="button" data-act="reset">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Start over</button>
+      </div>
+      <p class="sr" id="announce" aria-live="polite"></p>
+    </section>
+  </div>
+</section>
 
-      <div class="panel">
-        <h3>Price any stay</h3>
-        <p class="note">Move the slider. The bill tracks the length of stay, because that is what a
-          bill is for.</p>
-        <div class="ctrlrow">
-          <div class="ctrl">
-            <label for="nights">Length of stay — <span class="now" id="nightsNow">7 nights</span></label>
-            <input class="slider" type="range" id="nights" min="1" max="30" value="7">
-          </div>
+<section class="page" id="how" aria-labelledby="howTitle">
+  <div class="wrap">
+    <h2 class="title" id="howTitle">How it works</h2>
+    <p class="intro-p">Follow one admission through the system: from whichever screen the desk is using, past the
+      rules, into the database, and out again as a bill.</p>
+    <ol class="flow">
+      <li>
+        <div class="num" aria-hidden="true">1</div>
+        <div class="art" aria-hidden="true">
+          <svg viewBox="0 0 300 168">
+            <g transform="translate(6,10)">
+              <rect class="soft" x="0" y="0" width="86" height="40" rx="8"/>
+              <rect class="ink" x="10" y="10" width="14" height="10" rx="2" opacity=".85"/><rect class="lamp" x="27" y="10" width="14" height="10" rx="2"/><rect class="ink" x="44" y="10" width="14" height="10" rx="2" opacity=".85"/><rect class="lamp" x="61" y="10" width="14" height="10" rx="2"/>
+              <text x="43" y="33" text-anchor="middle" font-size="10.5" class="t-muted">Desktop app</text>
+            </g>
+            <g transform="translate(6,64)">
+              <rect class="soft" x="0" y="0" width="86" height="40" rx="8"/>
+              <text x="12" y="20" font-size="13" font-family="var(--mono)">&gt;_</text>
+              <text x="43" y="33" text-anchor="middle" font-size="10.5" class="t-muted">Console</text>
+            </g>
+            <g transform="translate(6,118)">
+              <rect class="soft" x="0" y="0" width="86" height="40" rx="8"/>
+              <text x="12" y="20" font-size="13">{ }</text>
+              <text x="43" y="33" text-anchor="middle" font-size="10.5" class="t-muted">JSON API</text>
+            </g>
+            <path class="stroke" d="M94 30 C122 30 122 80 146 82 M94 84 H146 M94 138 C122 138 122 88 146 86" opacity=".55"/>
+            <rect x="148" y="56" width="78" height="56" rx="12" fill="#1d3a86"/>
+            <text x="187" y="80" text-anchor="middle" font-size="12" fill="#fff" style="fill:#fff">The rules</text>
+            <text x="187" y="97" text-anchor="middle" font-size="10" style="fill:#c3cde2;font-weight:500">services</text>
+            <path class="stroke" d="M228 84 H250" opacity=".55"/><path class="stroke" d="M245 79 L251 84 L245 89" opacity=".55"/>
+            <g transform="translate(254,58)">
+              <ellipse class="soft" cx="20" cy="8" rx="20" ry="7"/>
+              <path class="soft" d="M0 8 V44 A20 7 0 0 0 40 44 V8"/>
+              <ellipse cx="20" cy="8" rx="20" ry="7" fill="none" stroke="var(--line-2)" stroke-width="1.5"/>
+              <text x="20" y="34" text-anchor="middle" font-size="10" class="t-muted">SQLite</text>
+            </g>
+          </svg>
         </div>
-        <div class="ctrlrow">
-          <div class="ctrl">
-            <label for="ward">Ward</label>
-            <select id="ward"></select>
-          </div>
-          <div class="ctrl">
-            <label for="dep">Deposit</label>
-            <select id="dep">
-              <option value="3000">₹3,000</option>
-              <option value="5000" selected>₹5,000</option>
-              <option value="10000">₹10,000</option>
-              <option value="20000">₹20,000</option>
-            </select>
-          </div>
+        <h3>Three ways in, one set of rules</h3>
+        <p>A desktop app, a console and a JSON API sit on top of the same services. None of them holds a rule of its
+          own, so they can't disagree about who is in which bed or what anyone owes.</p>
+      </li>
+      <li>
+        <div class="num" aria-hidden="true">2</div>
+        <div class="art" aria-hidden="true">
+          <svg viewBox="0 0 300 168">
+            <rect x="196" y="34" width="70" height="84" rx="5" fill="#26324f"/>
+            <rect x="204" y="42" width="54" height="68" rx="3" class="lamp"/>
+            <rect x="204" y="64" width="54" height="2.5" fill="#75633f"/>
+            <g fill="rgba(110,58,12,.58)"><circle cx="219" cy="86" r="5"/><path d="M226 98 C230 87 244 87 250 93 L252 100 H226 Z"/></g>
+            <g transform="translate(70,26)">
+              <rect class="soft" x="0" y="0" width="98" height="46" rx="9" style="fill:var(--card)"/>
+              <text x="12" y="19" font-size="11.5">Admission #42</text>
+              <text x="12" y="35" font-size="10.5" class="t-muted">G-102 · ACTIVE</text>
+            </g>
+            <path class="stroke" d="M168 49 H200" opacity=".7"/>
+            <circle cx="200" cy="49" r="3.5" class="ink"/>
+            <g transform="translate(14,104)">
+              <rect x="0" y="0" width="98" height="46" rx="9" fill="var(--card)" stroke="var(--no)" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <text x="12" y="19" font-size="11.5">Admission #59</text>
+              <text x="12" y="35" font-size="10.5" class="t-muted">G-102 · ACTIVE</text>
+            </g>
+            <path d="M114 127 C140 127 158 120 176 108" fill="none" stroke="var(--no)" stroke-width="2" stroke-dasharray="4 4"/>
+            <circle cx="182" cy="103" r="11" fill="var(--card)" stroke="var(--no)" stroke-width="2.5"/>
+            <path d="M174.5 110.5 L189.5 95.5" stroke="var(--no)" stroke-width="2.5"/>
+          </svg>
         </div>
-        <div class="chartbox" style="height:200px"><canvas id="bugChart"></canvas></div>
+        <h3>The database has the last word</h3>
+        <p>A room counts as occupied when an active admission points at it. There is no "occupied" flag to forget to
+          update. The schema allows one active admission per room, so two patients in one bed is impossible, not just
+          unlikely. Discharging closes the stay and keeps the patient's record.</p>
+        <pre class="snip"><span class="k">CREATE UNIQUE INDEX</span> uq_active_room
+    <span class="k">ON</span> admissions(room_no)
+    <span class="k">WHERE</span> status = <span class="s">'ACTIVE'</span>;</pre>
+      </li>
+      <li>
+        <div class="num" aria-hidden="true">3</div>
+        <div class="art" aria-hidden="true" id="billArt"></div>
+        <h3>The bill adds itself up</h3>
+        <p>An invoice is a list of items that price themselves. A room charge is nights × the nightly rate (a part
+          night counts, and no stay is free). A scan or a medicine is quantity × price. Money is kept in whole paise,
+          never as a floating-point number.</p>
+        <p id="payLine">Staff pay works the same way: each kind of staff member works out its own allowance.</p>
+        <pre class="snip">lines.stream()
+     .map(BillableItem::lineTotal)
+     .reduce(Money.ZERO, Money::plus);</pre>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="page why" id="why" aria-labelledby="whyTitle">
+  <div class="wrap">
+    <h2 class="title" id="whyTitle">Why it's built this way</h2>
+    <p class="intro-p">Each of those choices costs more than the obvious version. So the repository keeps the obvious
+      version too, and a test runs both against the same hospital.</p>
+
+    <div class="feature">
+      <div>
+        <h3>A bill that forgets the nights</h3>
+        <p>The tempting formula is <code>rate − deposit</code>. It reads fine until you notice that the rate is the
+          price of one night, so the length of the stay never reaches the bill.</p>
+        <p id="sampleLine"></p>
+        <div class="slider">
+          <label for="nights"><span>Nights in the room</span><output id="nightsOut" for="nights"></output></label>
+          <input type="range" id="nights" min="1" max="30" step="1" value="14">
+        </div>
         <div class="readouts">
-          <div class="ro correct">
-            <div class="lbl">Health Haven</div>
-            <div class="val" id="roCorrect">—</div>
-            <div class="formula">nights × rate − deposit</div>
-          </div>
-          <div class="ro legacy">
-            <div class="lbl">The naive formula</div>
-            <div class="val" id="roLegacy">—</div>
-            <div class="formula">rate − deposit</div>
-          </div>
+          <div class="ro"><div class="lbl"><i style="background:var(--chart-a)"></i>Health Haven</div>
+            <div class="val" id="roA"></div><div class="sub" id="roAsub"></div></div>
+          <div class="ro"><div class="lbl"><i style="background:var(--chart-b)"></i><span>rate − deposit</span></div>
+            <div class="val" id="roB"></div><div class="sub" id="roBsub"></div></div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>Pay is computed, never stored</h2>
-    <p class="sub">The database stores a base salary. What each person actually earns is decided by
-      their <em>class</em> — <code>Doctor</code>, <code>Nurse</code>, <code>Driver</code> — each
-      overriding <code>monthlyPay()</code> with its own rule. Pick someone and watch their own code
-      run.</p>
-    <div class="paywrap">
-      <div class="stafflist" id="stafflist"></div>
-      <div class="calc" id="calc"></div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>Operations</h2>
-    <div class="grid3">
-      <div class="panel">
-        <h3>Occupancy by ward type</h3>
-        <p class="note">Beds occupied against free.</p>
-        <div class="chartbox"><canvas id="occChart"></canvas></div>
-      </div>
-      <div class="panel">
-        <h3>Admissions, last 30 days</h3>
-        <p class="note">Arrivals per day.</p>
-        <div class="chartbox"><canvas id="trendChart"></canvas></div>
-      </div>
-      <div class="panel">
-        <h3>Where the money comes from</h3>
-        <p class="note">Room and board is 77% of billings.</p>
-        <div class="chartbox"><canvas id="revenueChart"></canvas></div>
-      </div>
-    </div>
-    <div class="grid2" style="margin-top:20px">
-      <div class="panel">
-        <h3>Monthly payroll by role</h3>
-        <p class="note">Each bar is <code>monthlyPay()</code> summed over that role's staff.</p>
-        <div class="chartbox"><canvas id="payChart"></canvas></div>
-      </div>
-      <div class="panel">
-        <h3>Active admissions by department</h3>
-        <p class="note">Who is carrying the load right now.</p>
-        <div class="chartbox"><canvas id="deptChart"></canvas></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="built">
-  <div class="wrap">
-    <h2>How it's built</h2>
-    <p class="sub">Four layers, each depending only on the one beneath it. The domain layer does not
-      import <code>java.sql</code> and has no idea a database exists — which is why it can be tested
-      without one, and why the three interfaces are interchangeable.</p>
-    <div class="grid2">
-      <div>
-        <div class="layers">
-          <div class="layer l1"><span class="ln">ui/ · cli/ · web/</span><span class="ld">Swing desktop · console · JSON API</span></div>
-          <div class="arrow">↓</div>
-          <div class="layer l2"><span class="ln">service/</span><span class="ld">rules · permissions · transactions</span></div>
-          <div class="arrow">↓</div>
-          <div class="layer l3"><span class="ln">repository/</span><span class="ld">interfaces · JDBC, always parameterised</span></div>
-          <div class="arrow">↓</div>
-          <div class="layer l4"><span class="ln">domain/</span><span class="ld">Person · Admission · Money · BillableItem</span></div>
+      <div class="chart" id="chart">
+        <div class="chart-legend" aria-hidden="true">
+          <span><i style="background:var(--chart-a)"></i>Health Haven</span>
+          <span><i style="background:var(--chart-b)"></i>rate − deposit</span>
         </div>
-        <div class="codeline" style="margin-top:16px"><span class="k">sealed</span> Person → Patient | StaffMember
-StaffMember → Doctor | Nurse | Technician | Driver | AdminStaff
-BillableItem → RoomCharge | ExtraCharge</div>
+        <svg id="chartSvg" viewBox="0 0 600 300" role="img" aria-labelledby="chartDesc"></svg>
+        <p class="sr" id="chartDesc"></p>
+        <div class="chart-tip" id="chartTip" aria-hidden="true"></div>
+        <details class="table"><summary>See the numbers</summary><table id="chartTable"></table></details>
       </div>
-      <div class="panel">
-        <h3>Rules the database itself enforces</h3>
-        <p class="note">Application code is the first line of defence; the schema is the last.</p>
-        <ul class="ticks">
-          <li>One active admission per room — a partial unique index, so two patients in one bed is impossible, not merely unlikely</li>
-          <li>One active admission per patient</li>
-          <li>An admission is <code>ACTIVE</code> with no discharge time, or <code>DISCHARGED</code> with one — never both</li>
-          <li>One ambulance, one open dispatch</li>
-          <li>Money is <code>INTEGER</code> paise — never a float, never a string</li>
-          <li>Every stay bills at least one night</li>
-          <li><code>audit_log</code> is append-only</li>
+    </div>
+
+    <div class="tally">
+      <h3 id="tallyTitle"></h3>
+      <div class="bars" id="bars"></div>
+      <p class="note" id="tallyNote"></p>
+    </div>
+
+    <div class="traps">
+      <article class="trap">
+        <h4>Anyone could sign in</h4>
+        <pre class="snip">select * from login
+where ID = 'admin'
+and PW = '<mark>' OR '1'='1</mark>'</pre>
+        <ul class="outcome">
+          <li><svg class="x" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            <span><b>The obvious version</b> pastes the password into the SQL, so that password signs anyone in.</span></li>
+          <li><svg class="c" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+            <span><b>Health Haven</b> refuses it. What you type is a bound value, never SQL, and passwords are stored as bcrypt hashes.</span></li>
         </ul>
-      </div>
+      </article>
+      <article class="trap">
+        <h4>Discharge deleted the patient</h4>
+        <pre class="snip">DELETE FROM patient_info
+WHERE number = '…'</pre>
+        <ul class="outcome">
+          <li><svg class="x" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            <span><b>The obvious version</b> forgets everyone it discharges. A returning patient is a stranger.</span></li>
+          <li><svg class="c" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+            <span><b>Health Haven</b> closes the stay, issues the invoice and keeps the record. Everyone waiting at the front desk was discharged before.</span></li>
+        </ul>
+        <button class="textbtn" type="button" data-goto="1">See the queue at the front desk</button>
+      </article>
+      <article class="trap">
+        <h4>Two patients, one bed</h4>
+        <pre class="snip">UPDATE room
+SET availability = 'Occupied'
+WHERE room_no = '…'</pre>
+        <ul class="outcome">
+          <li><svg class="x" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            <span><b>The obvious version</b> keeps a flag that every screen must remember to update. It drifts, and two patients end up in one room.</span></li>
+          <li><svg class="c" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+            <span><b>Health Haven</b> works occupancy out from the admissions, and the database refuses the second one.</span></li>
+        </ul>
+        <button class="textbtn" type="button" data-goto="2">Try to double-book a bed</button>
+      </article>
     </div>
+    <p class="audit-line">All four comparisons run as tests, and side by side with
+      <code>java -jar target/health-haven.jar audit</code>.</p>
   </div>
 </section>
 
-<section>
+<section class="page" id="run" aria-labelledby="runTitle">
   <div class="wrap">
-    <h2>Three ways in, one set of rules</h2>
-    <p class="sub">Each surface is a thin adapter over the services. None of them contains a rule, so
-      none of them can disagree with the others.</p>
-    <div class="grid2">
-      <div>
-        <div class="shots">
-          <img src="screenshots/desktop-wards.png" alt="The desktop client's ward grid, beds coloured by occupancy">
-          <img src="screenshots/desktop-dashboard.png" alt="The desktop client's dashboard">
-        </div>
-        <p class="note" style="margin-top:10px">The Swing client — FlatLaf, real layout managers,
-          with admit, discharge and dispatch as working actions.</p>
-      </div>
+    <h2 class="title" id="runTitle">Run it yourself</h2>
+    <p class="intro-p">You need Java 21 and Maven. There is no database server and nothing to set up: the app creates
+      and seeds its SQLite file the first time it runs.</p>
+    <div class="run-grid">
       <div>
         <div class="term">
-          <div class="termbar"><i style="background:#e15a4c"></i><i style="background:#e5b02e"></i><i style="background:#2e9e6b"></i></div>
-          <pre><span class="p">$</span> java -jar health-haven.jar cli dashboard
+          <div class="tb" aria-hidden="true"><i></i><i></i><i></i></div>
+<pre tabindex="0" aria-label="Commands to build and run Health Haven"><span class="p">$</span> git clone https://github.com/safdar-hussain1/health-haven.git
+<span class="p">$</span> cd health-haven
+<span class="p">$</span> mvn package     <span class="c"># builds it, runs the 35 tests</span>
 
-<span class="m">== HEALTH HAVEN — STATUS ============================</span>
-  Patients registered   <span class="c">58</span>
-  Currently admitted    <span class="c">18</span>
-  Beds                  <span class="c">18</span> occupied / <span class="c">30</span> total (<span class="c">60%</span>)
-  Mean completed stay   <span class="c">8.3</span> nights
-  Total billed          <span class="c">₹20,78,200.00</span>
-  Outstanding           <span class="c">₹15,17,900.00</span>
-  Monthly payroll       <span class="c">₹18,75,440.00</span>
-
-<span class="p">$</span> java -jar health-haven.jar serve 8080
-<span class="m">GET /api/summary · /api/beds · /api/admissions
-    /api/patients · /api/staff · /api/audit</span></pre>
+<span class="c"># the desktop app</span>
+<span class="p">$</span> java -jar target/health-haven.jar
+<span class="c"># the console</span>
+<span class="p">$</span> java -jar target/health-haven.jar cli beds
+<span class="c"># the JSON API</span>
+<span class="p">$</span> java -jar target/health-haven.jar serve 8080
+<span class="c"># the obvious version against Health Haven</span>
+<span class="p">$</span> java -jar target/health-haven.jar audit</pre>
         </div>
-        <p class="note" style="margin-top:10px">The console and the JSON API — the latter on the
-          JDK's own <code>HttpServer</code>, no web framework.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="audit">
-  <div class="wrap">
-    <h2>Why it's built this way</h2>
-    <p class="sub">Several decisions here cost more than the obvious alternative — parameterised
-      SQL, an invoice that knows about length of stay, discharge as an archive, occupancy derived
-      rather than stored. The <code>naive/</code> package implements the obvious alternative, so
-      the difference can be <em>measured</em> instead of argued about. Reproduce all of it with
-      <code>java -jar health-haven.jar audit</code>.</p>
-
-    <div class="grid2" style="margin-bottom:20px">
-      <div class="panel">
-        <h3>The expensive one</h3>
-        <p class="note">Bill a stay as <code>rate − deposit</code> and it reads fine — until you
-          notice <code>rate</code> is the price of <em>one night</em>, and the length of stay is
-          nowhere in it. Replayed across the 40 invoices this hospital has actually issued:</p>
-        <div class="chartbox" style="height:150px"><canvas id="impactChart"></canvas></div>
-        <p class="note" style="margin:12px 0 0">A <em class="hl">91.3% shortfall</em>, and all 40
-          bills come out negative — the screen would tell the desk clerk that the hospital owes the
-          patient money.</p>
-      </div>
-      <div class="panel">
-        <h3>The other three</h3>
-        <ul class="ticks" style="margin-top:6px">
-          <li><b>Concatenated SQL lets anyone in.</b> Build the login query by string concatenation and the password <code>' OR '1'='1</code> signs you in as anybody. Health Haven binds parameters and verifies a bcrypt hash.</li>
-          <li><b>Discharge as a delete loses the patient.</b> <code>delete from patient</code> and the hospital forgets everyone it discharges. Health Haven archives the stay and keeps the person.</li>
-          <li><b>Occupancy as a flag double-books beds.</b> A text column that every screen must remember to update drifts out of step. Health Haven derives it, and the database refuses the second admission.</li>
+        <ul class="accounts">
+          <li>Sign in as <code>admin</code> / <code>aurora@35</code>, <code>reception</code> / <code>changeme-desk</code>
+            or <code>dr.iyer</code> / <code>changeme-doc1</code>.</li>
+          <li>The JSON API serves patient data, so it only listens on your own machine and every request needs the
+            token it prints when it starts.</li>
         </ul>
       </div>
-    </div>
-
-    <div class="panel tbl-scroll">
-      <table>
-        <thead><tr><th>#</th><th>Trap</th><th>The naive approach</th><th>Health Haven</th><th>Why it matters</th></tr></thead>
-        <tbody id="auditBody"></tbody>
-      </table>
+      <figure class="shot">
+        <div class="frame"><img src="screenshots/desktop-wards.png" width="1280" height="820" loading="lazy"
+          alt="The desktop app's ward view: a grid of the 30 rooms, green when free and red when occupied, each with its number of nights."></div>
+        <figcaption>The desktop app's ward view: the same 30 rooms as the building at the top of this page, in the same state.</figcaption>
+      </figure>
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   <div class="wrap">
-    Built by <a href="https://github.com/safdar-hussain1">Safdar Hussain</a> ·
-    <a href="https://github.com/safdar-hussain1/health-haven">github.com/safdar-hussain1/health-haven</a> ·
-    data generated <span id="gen"></span>
+    <span>Built by <a href="https://github.com/safdar-hussain1">Safdar Hussain</a>.
+      <a href="https://github.com/safdar-hussain1/health-haven">Source code on GitHub</a>, MIT licence.</span>
+    <span id="genLine"></span>
   </div>
 </footer>
 
 <script>
-(() => { const t = localStorage.getItem('hh-theme');
-         if (t) document.documentElement.setAttribute('data-theme', t); })();
-const DATA = {"generatedAt":"2026-07-13T06:21:41.574830Z","summary":{"patients":58,"activeAdmissions":18,"totalRooms":30,"occupiedRooms":18,"availableRooms":12,"occupancyRate":60,"staff":15,"totalBilledRupees":2078200,"outstandingRupees":1517900,"monthlyPayrollRupees":1875440,"meanStayNights":8.3,"invoices":40},"beds":[{"room":"G-101","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"G-102","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":2,"diagnosis":"Acute myocardial infarction"},{"room":"G-103","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":7,"diagnosis":"Cardiac arrhythmia"},{"room":"G-104","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":10,"diagnosis":"Bronchiolitis"},{"room":"G-105","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"G-106","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":2,"diagnosis":"Appendicitis"},{"room":"G-107","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"G-108","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":1,"diagnosis":"Acute myocardial infarction"},{"room":"G-109","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":7,"diagnosis":"Appendicitis"},{"room":"G-110","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":4,"diagnosis":"Dengue fever"},{"room":"G-111","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"G-112","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"SP-201","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":8,"diagnosis":"Pneumonia"},{"room":"SP-202","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":6,"diagnosis":"Hypertensive crisis"},{"room":"SP-203","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"AVAILABLE"},{"room":"SP-204","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":10,"diagnosis":"Dengue fever"},{"room":"SP-205","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":2,"diagnosis":"Appendicitis"},{"room":"SP-206","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"AVAILABLE"},{"room":"SP-207","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":8,"diagnosis":"Ischaemic stroke"},{"room":"SP-208","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":6,"diagnosis":"Pneumonia"},{"room":"P-301","type":"PRIVATE","floor":3,"rate":4500,"state":"AVAILABLE"},{"room":"P-302","type":"PRIVATE","floor":3,"rate":4500,"state":"OCCUPIED","nights":4,"diagnosis":"Hypertensive crisis"},{"room":"P-303","type":"PRIVATE","floor":3,"rate":4500,"state":"OCCUPIED","nights":6,"diagnosis":"Dengue fever"},{"room":"P-304","type":"PRIVATE","floor":3,"rate":4500,"state":"OCCUPIED","nights":10,"diagnosis":"Ischaemic stroke"},{"room":"P-305","type":"PRIVATE","floor":3,"rate":4500,"state":"AVAILABLE"},{"room":"P-306","type":"PRIVATE","floor":3,"rate":4500,"state":"OCCUPIED","nights":7,"diagnosis":"Cardiac arrhythmia"},{"room":"ICU-401","type":"ICU","floor":4,"rate":9000,"state":"AVAILABLE"},{"room":"ICU-402","type":"ICU","floor":4,"rate":9000,"state":"AVAILABLE"},{"room":"ICU-403","type":"ICU","floor":4,"rate":9000,"state":"AVAILABLE"},{"room":"ICU-404","type":"ICU","floor":4,"rate":9000,"state":"OCCUPIED","nights":3,"diagnosis":"Bronchiolitis"}],"occupancyByType":[{"type":"General ward","total":12,"occupied":7,"available":5},{"type":"Semi-private","total":8,"occupied":6,"available":2},{"type":"Private","total":6,"occupied":4,"available":2},{"type":"Intensive care","total":4,"occupied":1,"available":3}],"revenueMix":[{"kind":"Room & board","rupees":1597500},{"kind":"Procedures","rupees":452500},{"kind":"Consultations","rupees":69600},{"kind":"Pharmacy","rupees":104100},{"kind":"Ambulance","rupees":30000}],"departmentLoad":[{"department":"Cardiology","active":1},{"department":"Emergency","active":3},{"department":"General Medicine","active":6},{"department":"Neurology","active":2},{"department":"Orthopaedics","active":3},{"department":"Paediatrics","active":3}],"admissionsTrend":[{"date":"2026-06-14","count":1},{"date":"2026-06-15","count":1},{"date":"2026-06-16","count":1},{"date":"2026-06-17","count":0},{"date":"2026-06-18","count":1},{"date":"2026-06-19","count":1},{"date":"2026-06-20","count":0},{"date":"2026-06-21","count":0},{"date":"2026-06-22","count":0},{"date":"2026-06-23","count":0},{"date":"2026-06-24","count":2},{"date":"2026-06-25","count":0},{"date":"2026-06-26","count":0},{"date":"2026-06-27","count":0},{"date":"2026-06-28","count":2},{"date":"2026-06-29","count":0},{"date":"2026-06-30","count":0},{"date":"2026-07-01","count":1},{"date":"2026-07-02","count":1},{"date":"2026-07-03","count":1},{"date":"2026-07-04","count":2},{"date":"2026-07-05","count":1},{"date":"2026-07-06","count":3},{"date":"2026-07-07","count":4},{"date":"2026-07-08","count":0},{"date":"2026-07-09","count":1},{"date":"2026-07-10","count":2},{"date":"2026-07-11","count":1},{"date":"2026-07-12","count":3},{"date":"2026-07-13","count":0}],"payroll":[{"role":"Doctor","count":6,"monthlyRupees":1407000},{"role":"Nurse","count":4,"monthlyRupees":254160},{"role":"Technician","count":2,"monthlyRupees":105280},{"role":"Ambulance driver","count":2,"monthlyRupees":69000},{"role":"Administration","count":1,"monthlyRupees":40000}],"staff":[{"code":"EMP-015","name":"Lakshmi Rao","role":"Administration","type":"AdminStaff","baseRupees":40000,"allowance":"None","payRupees":40000},{"code":"EMP-003","name":"Dr. Anjali Rao","role":"Doctor","type":"Doctor","baseRupees":155000,"allowance":"Specialty 30% + seniority 10% (Neonatology)","payRupees":217000},{"code":"EMP-005","name":"Dr. Kavya Menon","role":"Doctor","type":"Doctor","baseRupees":140000,"allowance":"Specialty 30% + seniority 10% (Diabetology)","payRupees":196000},{"code":"EMP-001","name":"Dr. Meera Iyer","role":"Doctor","type":"Doctor","baseRupees":180000,"allowance":"Specialty 30% + seniority 10% (Interventional cardiology)","payRupees":252000},{"code":"EMP-002","name":"Dr. Rohan Nair","role":"Doctor","type":"Doctor","baseRupees":165000,"allowance":"Specialty 30% + seniority 10% (Joint replacement)","payRupees":231000},{"code":"EMP-004","name":"Dr. Sameer Khan","role":"Doctor","type":"Doctor","baseRupees":190000,"allowance":"Specialty 30% + seniority 10% (Stroke medicine)","payRupees":266000},{"code":"EMP-006","name":"Dr. Vikram Sethi","role":"Doctor","type":"Doctor","baseRupees":175000,"allowance":"Specialty 30% + seniority 10% (Emergency medicine)","payRupees":245000},{"code":"EMP-013","name":"Ganesh Reddy","role":"Ambulance driver","type":"Driver","baseRupees":32000,"allowance":"Travel \u20b93,000.00 flat","payRupees":35000},{"code":"EMP-014","name":"Iqbal Ahmed","role":"Ambulance driver","type":"Driver","baseRupees":31000,"allowance":"Travel \u20b93,000.00 flat","payRupees":34000},{"code":"EMP-010","name":"Arjun Pillai","role":"Nurse","type":"Nurse","baseRupees":50000,"allowance":"Ward 8% (General ward)","payRupees":54000},{"code":"EMP-008","name":"Fatima Sheikh","role":"Nurse","type":"Nurse","baseRupees":58000,"allowance":"Critical-ward 20% (ICU)","payRupees":69600},{"code":"EMP-009","name":"Neha Gupta","role":"Nurse","type":"Nurse","baseRupees":52000,"allowance":"Ward 8% (Paediatric ward)","payRupees":56160},{"code":"EMP-007","name":"Priya Deshpande","role":"Nurse","type":"Nurse","baseRupees":62000,"allowance":"Critical-ward 20% (Emergency)","payRupees":74400},{"code":"EMP-012","name":"Divya Nambiar","role":"Technician","type":"Technician","baseRupees":46000,"allowance":"Equipment 12%","payRupees":51520},{"code":"EMP-011","name":"Suresh Babu","role":"Technician","type":"Technician","baseRupees":48000,"allowance":"Equipment 12%","payRupees":53760}],"tariff":[{"type":"General ward","nightlyRupees":1200},{"type":"Semi-private","nightlyRupees":2500},{"type":"Private","nightlyRupees":4500},{"type":"Intensive care","nightlyRupees":9000}],"sampleInvoice":{"admissionId":31,"room":"P-304","ward":"Private","diagnosis":"Hypertensive crisis","nights":14,"lines":[{"kind":"Room & board","description":"Room P-304 \u2014 14 nights","quantity":14,"unitRupees":4500,"totalRupees":63000},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":3600,"totalRupees":3600},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":18000,"totalRupees":18000},{"kind":"Ambulance","description":"Ambulance transfer","quantity":1,"unitRupees":1500,"totalRupees":1500}],"roomTotalRupees":63000,"extrasTotalRupees":23100,"grossTotalRupees":86100,"depositRupees":7000,"balanceRupees":79100,"naiveBalanceRupees":-2500},"billingImpact":{"invoices":40,"correctGrossRupees":2078200,"naiveGrossRupees":180000,"shortfallRupees":1898200,"shortfallPct":91.3,"negativeBills":40},"audit":[{"id":"C1","title":"Concatenated SQL lets anyone sign in","naive":"Payload \"' OR '1'='1\" signs in: true","healthHaven":"Same payload rejected: true (parameterised; bcrypt hashes)","impact":"Anyone could enter the system without an account. Passwords stored in plain text."},{"id":"C2","title":"The bill ignores length of stay","naive":"1-night and 20-night stays both bill \u20b91500 (rate \u2212 deposit)","healthHaven":"20 nights \u00d7 \u20b94,500 \u2212 \u20b93,000 deposit = \u20b987,000.00","impact":"Long stays are under-billed by lakhs; an over-deposit shows as a negative bill."},{"id":"C3","title":"Discharge deletes the patient","naive":"Patient records remaining after discharge: 0","healthHaven":"Patient and stay history retained: true; invoice issued","impact":"The hospital permanently forgets everyone it discharges."},{"id":"C4","title":"Two patients can share one bed","naive":"Patients admitted to a single room: 2","healthHaven":"Second admission to an occupied room refused: true","impact":"Occupancy is a hand-updated flag, not a fact, so beds get double-booked."}]};
+const DATA = {"generatedAt":"2026-10-06T17:42:40.526086Z","summary":{"patients":58,"activeAdmissions":18,"totalRooms":30,"occupiedRooms":18,"availableRooms":12,"occupancyRate":60,"staff":15,"totalBilledRupees":2078200,"outstandingRupees":1517900,"monthlyPayrollRupees":1875440,"meanStayNights":8.3,"invoices":40},"beds":[{"room":"G-101","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"G-102","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":2,"diagnosis":"Acute myocardial infarction","admissionId":42,"mrn":"HH-000042","initials":"V.P.","gender":"FEMALE","age":78,"earlierStays":0,"depositRupees":20000,"charges":[{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":1300},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":12000},{"kind":"Ambulance","description":"Ambulance transfer","quantity":1,"unitRupees":1500}],"quotedBalanceRupees":-2800},{"room":"G-103","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":7,"diagnosis":"Cardiac arrhythmia","admissionId":49,"mrn":"HH-000049","initials":"N.R.","gender":"MALE","age":49,"earlierStays":0,"depositRupees":27000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":2,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":2200}],"quotedBalanceRupees":-14800},{"room":"G-104","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":10,"diagnosis":"Bronchiolitis","admissionId":57,"mrn":"HH-000057","initials":"K.R.","gender":"MALE","age":21,"earlierStays":0,"depositRupees":11000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":1,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":600},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":6500},{"kind":"Ambulance","description":"Ambulance transfer","quantity":1,"unitRupees":1500}],"quotedBalanceRupees":10400},{"room":"G-105","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"G-106","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":2,"diagnosis":"Appendicitis","admissionId":55,"mrn":"HH-000055","initials":"K.V.","gender":"FEMALE","age":43,"earlierStays":0,"depositRupees":23000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":3,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":1400},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":18500},{"kind":"Ambulance","description":"Ambulance transfer","quantity":1,"unitRupees":1500}],"quotedBalanceRupees":3200},{"room":"G-107","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"G-108","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":1,"diagnosis":"Acute myocardial infarction","admissionId":54,"mrn":"HH-000054","initials":"A.S.","gender":"FEMALE","age":35,"earlierStays":0,"depositRupees":8000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":3,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":3100}],"quotedBalanceRupees":-1300},{"room":"G-109","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":7,"diagnosis":"Appendicitis","admissionId":53,"mrn":"HH-000053","initials":"M.R.","gender":"MALE","age":46,"earlierStays":0,"depositRupees":25000,"charges":[{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":2200},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":3500}],"quotedBalanceRupees":-10900},{"room":"G-110","type":"GENERAL","floor":1,"rate":1200,"state":"OCCUPIED","nights":4,"diagnosis":"Dengue fever","admissionId":56,"mrn":"HH-000056","initials":"R.N.","gender":"FEMALE","age":20,"earlierStays":0,"depositRupees":21000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":3,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":500},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":31000}],"quotedBalanceRupees":17700},{"room":"G-111","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"G-112","type":"GENERAL","floor":1,"rate":1200,"state":"AVAILABLE"},{"room":"SP-201","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":8,"diagnosis":"Pneumonia","admissionId":44,"mrn":"HH-000044","initials":"A.P.","gender":"FEMALE","age":70,"earlierStays":0,"depositRupees":20000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":3,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":3900},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":7000}],"quotedBalanceRupees":13300},{"room":"SP-202","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":6,"diagnosis":"Hypertensive crisis","admissionId":58,"mrn":"HH-000058","initials":"S.R.","gender":"FEMALE","age":34,"earlierStays":0,"depositRupees":31000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":2,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":2600},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":2000}],"quotedBalanceRupees":-9800},{"room":"SP-203","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"AVAILABLE"},{"room":"SP-204","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":10,"diagnosis":"Dengue fever","admissionId":52,"mrn":"HH-000052","initials":"S.N.","gender":"FEMALE","age":74,"earlierStays":0,"depositRupees":12000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":3,"unitRupees":800}],"quotedBalanceRupees":15400},{"room":"SP-205","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":2,"diagnosis":"Appendicitis","admissionId":47,"mrn":"HH-000047","initials":"A.I.","gender":"MALE","age":28,"earlierStays":0,"depositRupees":14000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":2,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":1100}],"quotedBalanceRupees":-6300},{"room":"SP-206","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"AVAILABLE"},{"room":"SP-207","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":8,"diagnosis":"Ischaemic stroke","admissionId":45,"mrn":"HH-000045","initials":"P.G.","gender":"MALE","age":9,"earlierStays":0,"depositRupees":29000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":1,"unitRupees":800},{"kind":"Ambulance","description":"Ambulance transfer","quantity":1,"unitRupees":1500}],"quotedBalanceRupees":-6700},{"room":"SP-208","type":"SEMI_PRIVATE","floor":2,"rate":2500,"state":"OCCUPIED","nights":6,"diagnosis":"Pneumonia","admissionId":50,"mrn":"HH-000050","initials":"A.K.","gender":"FEMALE","age":67,"earlierStays":0,"depositRupees":17000,"charges":[{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":3600}],"quotedBalanceRupees":1600},{"room":"P-301","type":"PRIVATE","floor":3,"rate":4500,"state":"AVAILABLE"},{"room":"P-302","type":"PRIVATE","floor":3,"rate":4500,"state":"OCCUPIED","nights":4,"diagnosis":"Hypertensive crisis","admissionId":43,"mrn":"HH-000043","initials":"S.V.","gender":"MALE","age":65,"earlierStays":0,"depositRupees":25000,"charges":[{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":2900}],"quotedBalanceRupees":-4100},{"room":"P-303","type":"PRIVATE","floor":3,"rate":4500,"state":"OCCUPIED","nights":6,"diagnosis":"Dengue fever","admissionId":51,"mrn":"HH-000051","initials":"D.R.","gender":"FEMALE","age":37,"earlierStays":0,"depositRupees":11000,"charges":[{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":1000}],"quotedBalanceRupees":17000},{"room":"P-304","type":"PRIVATE","floor":3,"rate":4500,"state":"OCCUPIED","nights":10,"diagnosis":"Ischaemic stroke","admissionId":41,"mrn":"HH-000041","initials":"A.D.","gender":"MALE","age":52,"earlierStays":0,"depositRupees":25000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":1,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":3200},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":22500}],"quotedBalanceRupees":46500},{"room":"P-305","type":"PRIVATE","floor":3,"rate":4500,"state":"AVAILABLE"},{"room":"P-306","type":"PRIVATE","floor":3,"rate":4500,"state":"OCCUPIED","nights":7,"diagnosis":"Cardiac arrhythmia","admissionId":46,"mrn":"HH-000046","initials":"M.G.","gender":"MALE","age":50,"earlierStays":0,"depositRupees":16000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":1,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":1500},{"kind":"Ambulance","description":"Ambulance transfer","quantity":1,"unitRupees":1500}],"quotedBalanceRupees":19300},{"room":"ICU-401","type":"ICU","floor":4,"rate":9000,"state":"AVAILABLE"},{"room":"ICU-402","type":"ICU","floor":4,"rate":9000,"state":"AVAILABLE"},{"room":"ICU-403","type":"ICU","floor":4,"rate":9000,"state":"AVAILABLE"},{"room":"ICU-404","type":"ICU","floor":4,"rate":9000,"state":"OCCUPIED","nights":3,"diagnosis":"Bronchiolitis","admissionId":48,"mrn":"HH-000048","initials":"A.G.","gender":"FEMALE","age":13,"earlierStays":0,"depositRupees":14000,"charges":[{"kind":"Consultations","description":"Specialist consultation","quantity":3,"unitRupees":800},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":1000},{"kind":"Procedures","description":"Ventilator support","quantity":1,"unitRupees":10500}],"quotedBalanceRupees":26900}],"occupancyByType":[{"type":"General ward","total":12,"occupied":7,"available":5},{"type":"Semi-private","total":8,"occupied":6,"available":2},{"type":"Private","total":6,"occupied":4,"available":2},{"type":"Intensive care","total":4,"occupied":1,"available":3}],"revenueMix":[{"kind":"Room & board","rupees":1597500},{"kind":"Procedures","rupees":452500},{"kind":"Consultations","rupees":69600},{"kind":"Pharmacy","rupees":104100},{"kind":"Ambulance","rupees":30000}],"departmentLoad":[{"department":"Cardiology","active":1},{"department":"Emergency","active":3},{"department":"General Medicine","active":6},{"department":"Neurology","active":2},{"department":"Orthopaedics","active":3},{"department":"Paediatrics","active":3}],"admissionsTrend":[{"date":"2026-09-07","count":1},{"date":"2026-09-08","count":1},{"date":"2026-09-09","count":1},{"date":"2026-09-10","count":0},{"date":"2026-09-11","count":1},{"date":"2026-09-12","count":1},{"date":"2026-09-13","count":0},{"date":"2026-09-14","count":0},{"date":"2026-09-15","count":0},{"date":"2026-09-16","count":0},{"date":"2026-09-17","count":2},{"date":"2026-09-18","count":0},{"date":"2026-09-19","count":0},{"date":"2026-09-20","count":0},{"date":"2026-09-21","count":2},{"date":"2026-09-22","count":0},{"date":"2026-09-23","count":0},{"date":"2026-09-24","count":1},{"date":"2026-09-25","count":1},{"date":"2026-09-26","count":0},{"date":"2026-09-27","count":3},{"date":"2026-09-28","count":0},{"date":"2026-09-29","count":2},{"date":"2026-09-30","count":3},{"date":"2026-10-01","count":3},{"date":"2026-10-02","count":0},{"date":"2026-10-03","count":2},{"date":"2026-10-04","count":1},{"date":"2026-10-05","count":4},{"date":"2026-10-06","count":0}],"payroll":[{"role":"Doctor","count":6,"monthlyRupees":1407000},{"role":"Nurse","count":4,"monthlyRupees":254160},{"role":"Technician","count":2,"monthlyRupees":105280},{"role":"Ambulance driver","count":2,"monthlyRupees":69000},{"role":"Administration","count":1,"monthlyRupees":40000}],"staff":[{"code":"EMP-015","name":"Lakshmi Rao","role":"Administration","type":"AdminStaff","baseRupees":40000,"allowance":"None","payRupees":40000},{"code":"EMP-003","name":"Dr. Anjali Rao","role":"Doctor","type":"Doctor","baseRupees":155000,"allowance":"Specialty 30% + seniority 10% (Neonatology)","payRupees":217000},{"code":"EMP-005","name":"Dr. Kavya Menon","role":"Doctor","type":"Doctor","baseRupees":140000,"allowance":"Specialty 30% + seniority 10% (Diabetology)","payRupees":196000},{"code":"EMP-001","name":"Dr. Meera Iyer","role":"Doctor","type":"Doctor","baseRupees":180000,"allowance":"Specialty 30% + seniority 10% (Interventional cardiology)","payRupees":252000},{"code":"EMP-002","name":"Dr. Rohan Nair","role":"Doctor","type":"Doctor","baseRupees":165000,"allowance":"Specialty 30% + seniority 10% (Joint replacement)","payRupees":231000},{"code":"EMP-004","name":"Dr. Sameer Khan","role":"Doctor","type":"Doctor","baseRupees":190000,"allowance":"Specialty 30% + seniority 10% (Stroke medicine)","payRupees":266000},{"code":"EMP-006","name":"Dr. Vikram Sethi","role":"Doctor","type":"Doctor","baseRupees":175000,"allowance":"Specialty 30% + seniority 10% (Emergency medicine)","payRupees":245000},{"code":"EMP-013","name":"Ganesh Reddy","role":"Ambulance driver","type":"Driver","baseRupees":32000,"allowance":"Travel \u20b93,000.00 flat","payRupees":35000},{"code":"EMP-014","name":"Iqbal Ahmed","role":"Ambulance driver","type":"Driver","baseRupees":31000,"allowance":"Travel \u20b93,000.00 flat","payRupees":34000},{"code":"EMP-010","name":"Arjun Pillai","role":"Nurse","type":"Nurse","baseRupees":50000,"allowance":"Ward 8% (General ward)","payRupees":54000},{"code":"EMP-008","name":"Fatima Sheikh","role":"Nurse","type":"Nurse","baseRupees":58000,"allowance":"Critical-ward 20% (ICU)","payRupees":69600},{"code":"EMP-009","name":"Neha Gupta","role":"Nurse","type":"Nurse","baseRupees":52000,"allowance":"Ward 8% (Paediatric ward)","payRupees":56160},{"code":"EMP-007","name":"Priya Deshpande","role":"Nurse","type":"Nurse","baseRupees":62000,"allowance":"Critical-ward 20% (Emergency)","payRupees":74400},{"code":"EMP-012","name":"Divya Nambiar","role":"Technician","type":"Technician","baseRupees":46000,"allowance":"Equipment 12%","payRupees":51520},{"code":"EMP-011","name":"Suresh Babu","role":"Technician","type":"Technician","baseRupees":48000,"allowance":"Equipment 12%","payRupees":53760}],"tariff":[{"type":"General ward","nightlyRupees":1200},{"type":"Semi-private","nightlyRupees":2500},{"type":"Private","nightlyRupees":4500},{"type":"Intensive care","nightlyRupees":9000}],"sampleInvoice":{"admissionId":31,"room":"P-304","ward":"Private","diagnosis":"Hypertensive crisis","nights":14,"lines":[{"kind":"Room & board","description":"Room P-304 \u2014 14 nights","quantity":14,"unitRupees":4500,"totalRupees":63000},{"kind":"Pharmacy","description":"Ward pharmacy","quantity":1,"unitRupees":3600,"totalRupees":3600},{"kind":"Procedures","description":"Diagnostic imaging","quantity":1,"unitRupees":18000,"totalRupees":18000},{"kind":"Ambulance","description":"Ambulance transfer","quantity":1,"unitRupees":1500,"totalRupees":1500}],"roomTotalRupees":63000,"extrasTotalRupees":23100,"grossTotalRupees":86100,"depositRupees":7000,"balanceRupees":79100,"naiveBalanceRupees":-2500},"billingImpact":{"invoices":40,"correctGrossRupees":2078200,"naiveGrossRupees":180000,"shortfallRupees":1898200,"shortfallPct":91.3,"negativeBills":40},"audit":[{"id":"C1","title":"Concatenated SQL lets anyone sign in","naive":"Payload \"' OR '1'='1\" signs in: true","healthHaven":"Same payload rejected: true (parameterised; bcrypt hashes)","impact":"Anyone could enter the system without an account. Passwords stored in plain text."},{"id":"C2","title":"The bill ignores length of stay","naive":"1-night and 20-night stays both bill \u20b91500 (rate \u2212 deposit)","healthHaven":"20 nights \u00d7 \u20b94,500 \u2212 \u20b93,000 deposit = \u20b987,000.00","impact":"Long stays are under-billed by lakhs; an over-deposit shows as a negative bill."},{"id":"C3","title":"Discharge deletes the patient","naive":"Patient records remaining after discharge: 0","healthHaven":"Patient and stay history retained: true; invoice issued","impact":"The hospital permanently forgets everyone it discharges."},{"id":"C4","title":"Two patients can share one bed","naive":"Patients admitted to a single room: 2","healthHaven":"Second admission to an occupied room refused: true","impact":"Occupancy is a hand-updated flag, not a fact, so beds get double-booked."}],"waiting":[{"mrn":"HH-000026","initials":"G.P.","gender":"MALE","age":82,"earlierStays":1},{"mrn":"HH-000006","initials":"A.I.","gender":"MALE","age":37,"earlierStays":1},{"mrn":"HH-000021","initials":"P.R.","gender":"MALE","age":26,"earlierStays":1},{"mrn":"HH-000030","initials":"A.R.","gender":"FEMALE","age":68,"earlierStays":1},{"mrn":"HH-000018","initials":"A.S.","gender":"FEMALE","age":22,"earlierStays":1},{"mrn":"HH-000032","initials":"K.P.","gender":"MALE","age":19,"earlierStays":1},{"mrn":"HH-000012","initials":"N.R.","gender":"FEMALE","age":38,"earlierStays":1},{"mrn":"HH-000003","initials":"P.N.","gender":"FEMALE","age":19,"earlierStays":1},{"mrn":"HH-000007","initials":"R.I.","gender":"FEMALE","age":29,"earlierStays":1},{"mrn":"HH-000029","initials":"D.M.","gender":"FEMALE","age":37,"earlierStays":1},{"mrn":"HH-000014","initials":"A.S.","gender":"FEMALE","age":57,"earlierStays":1},{"mrn":"HH-000028","initials":"R.I.","gender":"FEMALE","age":81,"earlierStays":1},{"mrn":"HH-000034","initials":"V.N.","gender":"MALE","age":71,"earlierStays":1},{"mrn":"HH-000024","initials":"S.I.","gender":"MALE","age":74,"earlierStays":1},{"mrn":"HH-000016","initials":"A.N.","gender":"FEMALE","age":79,"earlierStays":1},{"mrn":"HH-000036","initials":"A.P.","gender":"FEMALE","age":35,"earlierStays":1},{"mrn":"HH-000019","initials":"D.I.","gender":"FEMALE","age":21,"earlierStays":1},{"mrn":"HH-000037","initials":"F.P.","gender":"MALE","age":40,"earlierStays":1},{"mrn":"HH-000008","initials":"K.R.","gender":"MALE","age":49,"earlierStays":1},{"mrn":"HH-000040","initials":"D.I.","gender":"MALE","age":77,"earlierStays":1},{"mrn":"HH-000027","initials":"M.G.","gender":"FEMALE","age":28,"earlierStays":1},{"mrn":"HH-000022","initials":"S.R.","gender":"MALE","age":52,"earlierStays":1},{"mrn":"HH-000033","initials":"K.N.","gender":"MALE","age":63,"earlierStays":1},{"mrn":"HH-000013","initials":"R.G.","gender":"MALE","age":59,"earlierStays":1},{"mrn":"HH-000004","initials":"P.I.","gender":"FEMALE","age":59,"earlierStays":1},{"mrn":"HH-000025","initials":"S.R.","gender":"MALE","age":22,"earlierStays":1},{"mrn":"HH-000002","initials":"R.S.","gender":"MALE","age":33,"earlierStays":1},{"mrn":"HH-000020","initials":"K.V.","gender":"MALE","age":37,"earlierStays":1},{"mrn":"HH-000005","initials":"K.D.","gender":"MALE","age":57,"earlierStays":1},{"mrn":"HH-000011","initials":"R.G.","gender":"MALE","age":74,"earlierStays":1},{"mrn":"HH-000015","initials":"F.P.","gender":"FEMALE","age":11,"earlierStays":1},{"mrn":"HH-000038","initials":"F.D.","gender":"FEMALE","age":57,"earlierStays":1},{"mrn":"HH-000010","initials":"R.I.","gender":"MALE","age":6,"earlierStays":1},{"mrn":"HH-000009","initials":"P.P.","gender":"FEMALE","age":52,"earlierStays":1},{"mrn":"HH-000039","initials":"G.R.","gender":"FEMALE","age":35,"earlierStays":1},{"mrn":"HH-000023","initials":"N.V.","gender":"FEMALE","age":32,"earlierStays":1},{"mrn":"HH-000001","initials":"V.V.","gender":"FEMALE","age":26,"earlierStays":1},{"mrn":"HH-000017","initials":"P.D.","gender":"FEMALE","age":62,"earlierStays":1},{"mrn":"HH-000035","initials":"L.V.","gender":"FEMALE","age":54,"earlierStays":1},{"mrn":"HH-000031","initials":"P.M.","gender":"MALE","age":14,"earlierStays":1}],"ambulances":[{"vehicle":"TS07-UA-1191","driver":"Ganesh Reddy","status":"AVAILABLE"},{"vehicle":"TS07-UA-1192","driver":"Iqbal Ahmed","status":"AVAILABLE"},{"vehicle":"TS07-UA-1193","driver":"Relief driver","status":"MAINTENANCE"}]};
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
-        integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const inr = n => (n<0?'-':'') + '₹' + Math.abs(Math.round(n)).toLocaleString('en-IN');
-const inrShort = n => {
-  const a = Math.abs(n);
-  if (a >= 1e5) return (n<0?'-':'') + '₹' + (a/1e5).toFixed(a >= 1e7 ? 0 : 1) + 'L';
-  if (a >= 1e3) return (n<0?'-':'') + '₹' + Math.round(a/1e3) + 'k';
-  return inr(n);
+(() => {
+'use strict';
+console.info('Health Haven — built by Safdar Hussain · https://github.com/safdar-hussain1/health-haven');
+
+/* ---------- helpers ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const motionOK = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const group = n => {                       // Indian digit grouping: 20,78,200
+  const s = String(Math.abs(Math.round(n)));
+  if (s.length <= 3) return s;
+  return s.slice(0, -3).replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + s.slice(-3);
 };
-const typeLabel = t => ({GENERAL:'General ward',SEMI_PRIVATE:'Semi-private',PRIVATE:'Private',ICU:'Intensive care'})[t] || t;
+const inr = n => (n < 0 ? '−' : '') + '₹' + group(n);
+const money = n => (n < 0 ? '-₹' : '₹') + group(n) + '.00';   // as Money.format() prints it
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const icon = {
+  ok: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>',
+  no: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M5 19L19 5"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>',
+  print: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></svg>',
+  bed: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18V6M3 13h18v5M21 13v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="10" r="2"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 7v6M12 17h.01"/></svg>',
+  amb: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 16V7h11v9M13 10h4l4 4v2h-8"/><circle cx="6.5" cy="17.5" r="2"/><circle cx="16.5" cy="17.5" r="2"/><path d="M7.5 9.5v4M5.5 11.5h4"/></svg>',
+};
 
-/* ---------- tiles ---------- */
-const S = DATA.summary;
-document.getElementById('tiles').innerHTML = [
-  ['Patients', S.patients], ['Admitted now', S.activeAdmissions],
-  ['Occupancy', S.occupancyRate + '%'], ['Mean stay', S.meanStayNights + 'n'],
-  ['Billed', inrShort(S.totalBilledRupees)], ['Payroll / mo', inrShort(S.monthlyPayrollRupees)],
-].map(([k,v]) => `<div class="tile"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
-document.getElementById('gen').textContent = new Date(DATA.generatedAt).toISOString().slice(0,10);
+/* ---------- the hospital, as the Java app exported it ---------- */
+const WARD = {
+  GENERAL:      { name: 'General ward',   short: 'General ward', room: 'General ward room', c: 'var(--w1)' },
+  SEMI_PRIVATE: { name: 'Semi-private',   short: 'Semi-private', room: 'Semi-private room', c: 'var(--w2)' },
+  PRIVATE:      { name: 'Private',        short: 'Private', room: 'Private room', c: 'var(--w3)' },
+  ICU:          { name: 'Intensive care', short: 'ICU', room: 'Intensive care room', c: 'var(--w4)' },
+};
+const REASONS = ['Pneumonia', 'Dengue fever', 'Fractured femur', 'Appendicitis', 'Hypertensive crisis',
+  'Type 2 diabetes review', 'Cardiac arrhythmia', 'Bronchiolitis', 'Ischaemic stroke', 'Acute myocardial infarction'];
+const DEPOSITS = [5000, 10000, 8000, 20000, 6000, 15000];
+const EXPORTED = new Date(DATA.generatedAt);
+const sex = g => g === 'FEMALE' ? 'Female' : g === 'MALE' ? 'Male' : 'Other';
 
-/* ---------- ward grid ---------- */
-const bedsEl = document.getElementById('beds'), cardEl = document.getElementById('bedcard');
-const cls = s => s === 'OCCUPIED' ? 'occupied' : s === 'AVAILABLE' ? 'available' : 'out';
-const nice = s => s === 'OCCUPIED' ? 'Occupied' : s === 'AVAILABLE' ? 'Available' : 'Out of service';
-bedsEl.innerHTML = DATA.beds.map((b,i) => `
-  <button class="bed ${cls(b.state)}" data-i="${i}" aria-pressed="false" type="button">
-    <span class="bar"></span><span class="no">${b.room}</span>
-    <span class="st">${b.state === 'OCCUPIED' ? b.nights + (b.nights===1?' night':' nights') : nice(b.state)}</span>
-  </button>`).join('');
-function showBed(i){
-  const b = DATA.beds[i];
-  [...bedsEl.children].forEach((el,j) => el.setAttribute('aria-pressed', j===i));
-  cardEl.innerHTML = `
-    <div class="rm">${b.room}</div>
-    <span class="pill ${cls(b.state)}">${nice(b.state)}</span>
-    <dl class="kv">
-      <dt>Ward</dt><dd>${typeLabel(b.type)}</dd>
-      <dt>Floor</dt><dd>${b.floor}</dd>
-      <dt>Tariff</dt><dd>${inr(b.rate)}/night</dd>
-      ${b.state === 'OCCUPIED' ? `
-        <dt>Diagnosis</dt><dd>${b.diagnosis}</dd>
-        <dt>Nights so far</dt><dd>${b.nights}</dd>
-        <dt>Room charge</dt><dd><b>${inr(b.nights * b.rate)}</b></dd>` : ''}
-    </dl>
-    ${b.state === 'AVAILABLE' ? `<p class="note" style="margin:14px 0 0">Free to admit into. No active
-      admission points at this room.</p>` : ''}`;
-}
-bedsEl.addEventListener('click', e => { const b = e.target.closest('.bed'); if (b) showBed(+b.dataset.i); });
-showBed(DATA.beds.findIndex(b => b.state === 'OCCUPIED'));
-
-/* ---------- the real invoice ---------- */
-const IV = DATA.sampleInvoice;
-document.getElementById('invNo').textContent = IV.admissionId;
-document.getElementById('invMeta').textContent =
-  `${IV.ward} room ${IV.room} · ${IV.diagnosis} · ${IV.nights} nights`;
-document.getElementById('invoice').innerHTML = `
-  <div class="hdr"><span>HEALTH HAVEN</span><span>ADM #${IV.admissionId}</span></div>
-  ${IV.lines.map(l => `
-    <div class="iline">
-      <span>${l.description}<br><span class="q">${l.kind} · ${l.quantity} × ${inr(l.unitRupees)}</span></span>
-      <b>${inr(l.totalRupees)}</b>
-    </div>`).join('')}
-  <div class="itot"><span>Room &amp; board</span><b>${inr(IV.roomTotalRupees)}</b></div>
-  <div class="iline"><span>Extras</span><b>${inr(IV.extrasTotalRupees)}</b></div>
-  <div class="iline"><span>Gross total</span><b>${inr(IV.grossTotalRupees)}</b></div>
-  <div class="iline"><span>Less deposit</span><b>−${inr(IV.depositRupees)}</b></div>
-  <div class="itot"><span><b>BALANCE DUE</b></span><span class="due">${inr(IV.balanceRupees)}</span></div>
-  <div class="legacyline">Bill this stay the tempting way — <code>rate − deposit</code>, with the
-    14 nights nowhere in the sum — and it comes to <b>${inr(IV.naiveBalanceRupees)}</b>: the
-    hospital would owe the patient money.</div>`;
-
-/* ---------- price any stay ---------- */
-const RATES = {}; DATA.tariff.forEach(t => {});
-const RATE_BY_KEY = {GENERAL:1200, SEMI_PRIVATE:2500, PRIVATE:4500, ICU:9000};
-const wardSel = document.getElementById('ward');
-wardSel.innerHTML = Object.entries(RATE_BY_KEY)
-  .map(([k,v]) => `<option value="${k}"${k==='PRIVATE'?' selected':''}>${typeLabel(k)} — ${inr(v)}/night</option>`).join('');
-const nightsEl = document.getElementById('nights'), depEl = document.getElementById('dep'), NMAX = 30;
-
-const bugChart = new Chart(document.getElementById('bugChart'), {
-  type:'line',
-  data:{ labels: Array.from({length:NMAX},(_,i)=>i+1), datasets:[
-    { label:'Health Haven', data:[], borderColor:css('--s1'), backgroundColor:css('--s1'),
-      borderWidth:2, pointRadius:0, pointHoverRadius:5, tension:0 },
-    { label:'rate − deposit', data:[], borderColor:css('--s6'), backgroundColor:css('--s6'),
-      borderWidth:2, pointRadius:0, pointHoverRadius:5, borderDash:[5,4], tension:0 } ]},
-  options:{ maintainAspectRatio:false, responsive:true,
-    interaction:{ mode:'index', intersect:false },
-    plugins:{ legend:{ position:'top', align:'end', labels:{ boxWidth:10, boxHeight:10,
-        usePointStyle:true, pointStyle:'rectRounded', color:css('--ink-2'), font:{size:11} } },
-      tooltip:{ callbacks:{ title: it => `${it[0].label} night${it[0].label==='1'?'':'s'}`,
-        label: c => `${c.dataset.label}: ${inr(c.parsed.y)}` } } },
-    scales:{
-      x:{ title:{display:true,text:'nights stayed',color:css('--muted'),font:{size:10}},
-          grid:{color:css('--grid')}, ticks:{color:css('--muted'),font:{size:10},maxTicksLimit:10} },
-      y:{ grid:{color:css('--grid')}, ticks:{color:css('--muted'),font:{size:10},callback:v=>inrShort(v)} } }
+let S;                                     // demo state; fresh() returns a new one
+function fresh() {
+  const rooms = new Map();
+  for (const b of DATA.beds) {
+    rooms.set(b.room, {
+      no: b.room, type: b.type, floor: b.floor, rate: b.rate, out: b.state === 'OUT_OF_SERVICE',
+      stay: b.state !== 'OCCUPIED' ? null : {
+        id: b.admissionId, mrn: b.mrn, initials: b.initials, gender: b.gender, age: b.age,
+        earlier: b.earlierStays, reason: b.diagnosis, deposit: b.depositRupees,
+        charges: b.charges.map(c => ({ ...c })), nights0: b.nights, since: null,
+      },
+    });
   }
-});
-function redrawBug(){
-  const rate = RATE_BY_KEY[wardSel.value], dep = +depEl.value, n = +nightsEl.value;
-  bugChart.data.datasets[0].data = Array.from({length:NMAX},(_,i) => (i+1)*rate - dep);
-  bugChart.data.datasets[1].data = Array.from({length:NMAX},() => rate - dep);
-  bugChart.update('none');
-  document.getElementById('nightsNow').textContent = n + (n===1?' night':' nights');
-  document.getElementById('roCorrect').textContent = inr(n*rate - dep);
-  document.getElementById('roLegacy').textContent = inr(rate - dep);
+  const ids = DATA.beds.filter(b => b.admissionId).map(b => b.admissionId);
+  return {
+    night: 0, rooms,
+    queue: DATA.waiting.map((p, i) => ({ ...p, reason: REASONS[i % REASONS.length], deposit: DEPOSITS[i % DEPOSITS.length] })),
+    nextId: Math.max(...ids) + 1,
+    ambs: DATA.ambulances.map(a => ({ ...a })),
+    sel: null, view: 'guide', step: 1, last: null,
+    done: [false, false, false, false, false],
+  };
 }
-[nightsEl, wardSel, depEl].forEach(el => el.addEventListener('input', redrawBug));
-redrawBug();
 
-/* ---------- payroll polymorphism explorer ---------- */
-const staff = DATA.staff;
-const listEl = document.getElementById('stafflist'), calcEl = document.getElementById('calc');
-listEl.innerHTML = staff.map((s,i) => `
-  <button class="srow" data-i="${i}" aria-pressed="false" type="button">
-    <span>${s.name}<br><span class="rl">${s.type}</span></span>
-    <span style="font-variant-numeric:tabular-nums">${inrShort(s.payRupees)}</span>
-  </button>`).join('');
-function showStaff(i){
-  const s = staff[i];
-  [...listEl.children].forEach((el,j) => el.setAttribute('aria-pressed', j===i));
-  const allowance = s.payRupees - s.baseRupees;
-  calcEl.innerHTML = `
-    <h3 style="font-size:17px">${s.name}</h3>
-    <p class="note">${s.role} · <code>${s.type}</code> · ${s.code}</p>
-    <div class="calcsteps">
-      <div class="step"><div class="sl">Base salary</div><div class="sv">${inr(s.baseRupees)}</div></div>
-      <span class="op">+</span>
-      <div class="step"><div class="sl">Allowance</div><div class="sv">${inr(allowance)}</div></div>
-      <span class="op">=</span>
-      <div class="step total"><div class="sl">Monthly pay</div><div class="sv">${inr(s.payRupees)}</div></div>
-    </div>
-    <p class="note" style="margin:10px 0 0">Rule applied: <b style="color:var(--ink)">${s.allowance}</b></p>
-    <div class="codeline"><span class="k">class</span> ${s.type} <span class="k">extends</span> StaffMember {
-    <span class="k">@Override public</span> Money monthlyPay() { <span class="q">/* ${s.allowance} */</span> }
-}</div>
-    <p class="note" style="margin-top:14px">Only the base salary is in the database. The
-      <code>${inr(allowance)}</code> above is produced by this class, every time it is asked —
-      so payroll can total a list of mixed staff without a single <code>instanceof</code>.</p>`;
+/* ---------- the rules, mirrored from the Java ---------- */
+// Admission.billableNights: hours rounded up to whole nights, never fewer than one.
+const nightsOf = st => st.since === null ? st.nights0 + S.night : Math.max(1, S.night - st.since);
+
+// Invoice: a room line (nights × rate) plus every extra, less the deposit.
+function bill(r) {
+  const st = r.stay, n = nightsOf(st);
+  const lines = [{ desc: `Room ${r.no} — ${plural(n, 'night', 'nights')}`, qty: n, unit: r.rate, room: true }]
+    .concat(st.charges.map(c => ({ desc: c.description, qty: c.quantity, unit: c.unitRupees, room: false })));
+  lines.forEach(l => { l.total = l.qty * l.unit; });
+  const room = lines[0].total, gross = lines.reduce((a, l) => a + l.total, 0);
+  return { n, lines, room, extras: gross - room, gross, deposit: st.deposit, balance: gross - st.deposit,
+    naive: r.rate - st.deposit, charges: st.charges.length };
 }
-listEl.addEventListener('click', e => { const b = e.target.closest('.srow'); if (b) showStaff(+b.dataset.i); });
-showStaff(staff.findIndex(s => s.type === 'Doctor'));
 
-/* ---------- charts ---------- */
-const occ = DATA.occupancyByType;
-new Chart(document.getElementById('occChart'), {
-  type:'bar',
-  data:{ labels: occ.map(o=>o.type), datasets:[
-    { label:'Occupied', data:occ.map(o=>o.occupied), backgroundColor:css('--s1'), borderRadius:4, borderSkipped:false, stack:'a' },
-    { label:'Free', data:occ.map(o=>o.available), backgroundColor:css('--grid'), borderRadius:4, borderSkipped:false, stack:'a' } ]},
-  options:{ maintainAspectRatio:false, responsive:true,
-    plugins:{ legend:{ position:'top', align:'end', labels:{ boxWidth:10, boxHeight:10,
-      usePointStyle:true, pointStyle:'rectRounded', color:css('--ink-2'), font:{size:11} } } },
-    scales:{ x:{ grid:{display:false}, ticks:{color:css('--ink-2'),font:{size:10}}, stacked:true },
-             y:{ grid:{color:css('--grid')}, ticks:{color:css('--muted'),font:{size:11},stepSize:4}, stacked:true } } }
+function admit(no) {
+  const r = S.rooms.get(no), p = S.queue[0];
+  if (r.out) return refuse('room', no, `room ${no} is out of service`);
+  if (r.stay) return refuse('room', no, `room ${no} is already occupied`);
+  S.queue.shift();
+  r.stay = { id: S.nextId++, mrn: p.mrn, initials: p.initials, gender: p.gender, age: p.age, earlier: p.earlierStays,
+    reason: p.reason, deposit: p.deposit, charges: [], nights0: 0, since: S.night };
+  S.done[1] = true;
+  paintRoom(r, 'flick');
+  show('admitted', { no, who: r.stay });
+  say(`Admitted ${p.initials} to room ${no}.`);
+}
+
+function discharge(no, asDoctor) {
+  const r = S.rooms.get(no);
+  if (asDoctor) return refuse('doctor', no, 'dr.iyer may not DISCHARGE_PATIENT');
+  const b = bill(r), st = r.stay;
+  r.stay = null;
+  S.queue.push({ mrn: st.mrn, initials: st.initials, gender: st.gender, age: st.age, earlierStays: st.earlier + 1,
+    reason: REASONS[(st.id + 3) % REASONS.length], deposit: DEPOSITS[st.id % DEPOSITS.length] });
+  S.done[4] = true;
+  paintRoom(r);
+  show('receipt', { no, r, b, st, issued: dayAfter(S.night) });
+  say(`Discharged ${st.initials} from room ${no}. The bill is printed in the front desk.`);
+}
+
+function refuse(kind, key, message) {
+  if (kind === 'room') S.done[2] = true;
+  const el = kind === 'amb' ? ambEl(key) : roomEl(key);
+  if (el) { el.classList.remove('no'); void el.offsetWidth; el.classList.add('no'); setTimeout(() => el.classList.remove('no'), 700); }
+  show('refused', { kind, key, message });
+  say(`Refused: ${message}.`);
+}
+
+function dispatch(i) {
+  const a = S.ambs[i];
+  if (a.status !== 'AVAILABLE') return refuse('amb', i, `${a.vehicle} is ${a.status} and cannot be dispatched`);
+  a.status = 'DISPATCHED';
+  paintAmb(i);
+  show('amb', { i, note: 'sent' });
+  say(`${a.vehicle} is on its way.`);
+}
+function recall(i) {
+  const a = S.ambs[i];
+  a.status = 'AVAILABLE';
+  paintAmb(i);
+  show('amb', { i, note: 'back' });
+  say(`${a.vehicle} is back in the bay.`);
+}
+
+async function passNight() {
+  const lit = [...S.rooms.values()].filter(r => r.stay);
+  const before = new Map(lit.map(r => [r.no, nightsOf(r.stay)]));
+  S.night++;
+  S.done[3] = true;
+  // A stay admitted tonight already bills one night, so its first night changes nothing.
+  const grew = lit.filter(r => nightsOf(r.stay) > before.get(r.no));
+  const same = lit.filter(r => nightsOf(r.stay) === before.get(r.no));
+  const hero = $('.hero');
+  if (motionOK()) {
+    hero.classList.remove('passing'); void hero.offsetWidth; hero.classList.add('passing');
+    setTimeout(() => hero.classList.remove('passing'), 2300);
+    await sleep(1500);
+  }
+  for (const r of lit) roomEl(r.no).setAttribute('aria-label', roomLabel(r));
+  for (const r of grew) {
+    const tag = document.createElement('span');
+    tag.className = 'bump'; tag.textContent = '+1 night';
+    roomEl(r.no).appendChild(tag); setTimeout(() => tag.remove(), 1700);
+  }
+  clock();
+  show('night', { lit: lit.length, grew: grew.length, same: same.map(r => r.stay.initials) });
+  say(`A night passed. Every occupied room is one night longer.`);
+}
+
+/* ---------- the building ---------- */
+const BED_SVG = `<svg class="bed" viewBox="0 0 48 26" aria-hidden="true">
+  <path class="frame" d="M4 25V9M4 19h40v6M44 19v-3a3 3 0 0 0-3-3H17"/>
+  <g class="who"><path d="M4 9h3v16H4z"/><ellipse cx="12.5" cy="15.5" rx="5" ry="2.6"/><circle cx="13" cy="11.2" r="3.6"/>
+  <path d="M17.5 17.5c2.5-6 13-7.4 19.5-3.6 2.4 1.4 4.9 2.6 7 2.9V19H17.5z"/><path d="M4 19h40v4H4z"/></g></svg>`;
+const AMB_SVG = (maint) => `<svg viewBox="0 0 100 52" aria-hidden="true">
+  <rect class="lb lb1" x="30" y="2" width="9" height="5" rx="2" fill="#4f8dff"/><rect class="lb lb2" x="39" y="2" width="9" height="5" rx="2" fill="#ff5a5a"/>
+  <path d="M3 9a3 3 0 0 1 3-3h59v34H3z" fill="${maint ? '#aeb6c6' : '#f2f5fb'}"/>
+  <path d="M65 14h15l14 14v12H65z" fill="${maint ? '#9da6b8' : '#e3e9f4'}"/>
+  <path d="M69 18h10l10 10H69z" fill="#1b2a4a"/>
+  <rect x="3" y="27" width="91" height="4" fill="${maint ? '#8a93a6' : 'var(--w4)'}"/>
+  <path d="M27 13h6v5h5v6h-5v5h-6v-5h-5v-6h5z" fill="${maint ? '#7d879c' : 'var(--w1)'}"/>
+  <rect x="90" y="31" width="4" height="4" rx="1" fill="${maint ? '#7d879c' : '#ffd27a'}"/>
+  <circle cx="22" cy="42" r="7.5" fill="#0c1324"/><circle cx="22" cy="42" r="3" fill="#6b7896"/>
+  <circle cx="77" cy="42" r="7.5" fill="#0c1324"/><circle cx="77" cy="42" r="3" fill="#6b7896"/>
+  ${maint ? '<path d="M8 49 L13 36 L18 49 Z" fill="#ff8a3d"/><rect x="10.5" y="41" width="5" height="2.5" fill="#fff"/>' : ''}
+</svg>`;
+
+const floors = [...new Set(DATA.beds.map(b => b.floor))].sort((a, b) => b - a);
+const perFloor = f => DATA.beds.filter(b => b.floor === f);
+
+function roomLabel(r) {
+  const w = WARD[r.type].name;
+  if (r.out) return `Room ${r.no}, ${w}, out of service`;
+  if (!r.stay) return `Room ${r.no}, ${w}, free`;
+  return `Room ${r.no}, ${w}, occupied, ${plural(nightsOf(r.stay), 'night', 'nights')}`;
+}
+const roomEl = no => $(`.win[data-room="${no}"]`);
+const ambEl = i => $(`.amb[data-amb="${i}"]`);
+
+function buildBuilding() {
+  const bldg = $('#bldg');
+  const top = perFloor(floors[0]).length;
+  let html = `<div class="roof" aria-hidden="true" style="width:calc(${top} * var(--step) - var(--gap) + 2 * var(--pad))">
+      <span class="tank"></span><span class="unit"></span><span class="sign"></span><span class="parapet"></span></div>`;
+  floors.forEach((f, i) => {
+    const beds = perFloor(f), w = WARD[beds[0].type];
+    const above = i === 0 ? beds.length : perFloor(floors[i - 1]).length;
+    html += `<div class="floor" role="group" aria-label="Floor ${f}: ${w.name}, ${inr(beds[0].rate)} a night"
+        style="--wc:${w.c};--t:${(beds.length - above) / 2}">
+      <div class="wins">${beds.map((b, j) => `<button class="win c${(j + f) % 3}" type="button" data-room="${b.room}" tabindex="-1">
+        <span class="light"></span>${BED_SVG}<span class="tag">${b.room}</span></button>`).join('')}</div>
+      <div class="band" aria-hidden="true"><span class="fl">${f}</span><span class="long">${w.name}</span><span class="short">${w.short}</span>
+        <span class="rate">${inr(beds[0].rate)} a night</span></div></div>`;
+  });
+  const widest = Math.max(...floors.map(f => perFloor(f).length));
+  html += `<div class="lobby" style="width:calc(${widest} * var(--step) - var(--gap) + 2 * var(--pad))">
+      <div class="door" aria-hidden="true"><span class="canopy">Entrance</span><span class="doors"><i></i><i></i></span></div>
+      <div class="bay"><span class="canopy" aria-hidden="true">Emergency</span><div class="slots">
+        ${S.ambs.map((a, i) => `<button class="amb" type="button" data-amb="${i}">${AMB_SVG(a.status === 'MAINTENANCE')}</button>`).join('')}
+      </div></div></div>`;
+  bldg.innerHTML = html;
+  roomEl(DATA.beds[0].room).tabIndex = 0;
+}
+
+function paintRoom(r, effect) {
+  const el = roomEl(r.no);
+  el.classList.toggle('on', !!r.stay);
+  el.setAttribute('aria-label', roomLabel(r));
+  if (effect === 'flick' && motionOK()) { el.classList.remove('flick'); void el.offsetWidth; el.classList.add('flick'); }
+}
+function paintAmb(i) {
+  const a = S.ambs[i], el = ambEl(i);
+  const out = a.status === 'DISPATCHED';
+  el.classList.toggle('out', out);
+  el.classList.toggle('siren', out);
+  el.setAttribute('aria-label', `Ambulance ${a.vehicle}, ${a.status === 'AVAILABLE' ? 'in the bay' : out ? 'out on a call' : 'in maintenance'}`);
+}
+function paintAll(intro) {
+  const order = [...S.rooms.values()];
+  order.forEach(r => { roomEl(r.no).classList.remove('on'); roomEl(r.no).setAttribute('aria-label', roomLabel(r)); });
+  S.ambs.forEach((a, i) => paintAmb(i));
+  const lit = order.filter(r => r.stay);
+  if (!intro || !motionOK()) { lit.forEach(r => paintRoom(r)); return; }
+  // Lights come on one room at a time, in a fixed shuffled order.
+  let seed = 7; const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  lit.map(r => [rand(), r]).sort((a, b) => a[0] - b[0])
+     .forEach(([, r], k) => setTimeout(() => paintRoom(S.rooms.get(r.no), 'flick'), 350 + k * 85));
+}
+
+function select(sel, opts = {}) {
+  S.sel = sel;
+  $$('.win.sel, .amb.sel').forEach(el => el.classList.remove('sel'));
+  $$('.win[aria-pressed], .amb[aria-pressed]').forEach(el => el.removeAttribute('aria-pressed'));
+  if (sel && sel.kind === 'room') {
+    const el = roomEl(sel.key);
+    el.classList.add('sel'); el.setAttribute('aria-pressed', 'true');
+    $$('.win').forEach(w => { w.tabIndex = -1; }); el.tabIndex = 0;
+    show('room', { no: sel.key });
+    if (opts.reveal) say(`${roomLabel(S.rooms.get(sel.key))}. The front desk shows what you can do.`);
+  } else if (sel && sel.kind === 'amb') {
+    const el = ambEl(sel.key);
+    el.classList.add('sel'); el.setAttribute('aria-pressed', 'true');
+    show('amb', { i: sel.key });
+    if (opts.reveal) say(`${el.getAttribute('aria-label')}. The front desk shows what you can do.`);
+  }
+  if (opts.reveal) revealDesk();
+}
+
+function revealDesk() {
+  const r = $('#desk').getBoundingClientRect();
+  if (r.top > innerHeight - 140 || r.bottom < 80) $('#desk').scrollIntoView({ behavior: motionOK() ? 'smooth' : 'auto', block: 'nearest' });
+}
+
+/* ---------- the front desk ---------- */
+const STEPS = ['Admit', 'Double-book', 'Next night', 'Discharge'];
+const NEXT = ['admit a patient', 'try to double-book', 'let a night pass', 'discharge someone'];
+function renderSteps() {
+  $('#steps').innerHTML = STEPS.map((s, i) => {
+    const n = i + 1, done = S.done[n];
+    return `<li class="${done ? 'done' : ''}"><button type="button" data-step="${n}" ${S.view === 'guide' && S.step === n ? 'aria-current="step"' : ''}
+      aria-label="Step ${n}: ${s}${done ? ', done' : ''}"><span class="n" aria-hidden="true">${done ? '✓' : n}</span><span class="lbl" aria-hidden="true">${s}</span></button></li>`;
+  }).join('');
+}
+const nextStep = () => { const i = S.done.findIndex((d, k) => k > 0 && !d); return i === -1 ? 5 : i; };
+function clock() {
+  const d = dayAfter(S.night);
+  $('#clock').textContent = 'Night of ' + d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+function dayAfter(n) { const d = new Date(EXPORTED); d.setUTCDate(d.getUTCDate() + n); return d; }
+
+function wristband(p, lead) {
+  const digits = p.mrn.replace(/\D/g, '');
+  const b = [2, 4, 7, 9].map((x, i) => x + (+digits[digits.length - 1 - i] || 0) % 4);
+  return `<div class="band-tag"><span class="snap" aria-hidden="true">${esc(p.initials)}</span>
+    <span class="who"><b>${esc(lead || p.initials)} <span style="display:inline;color:inherit;font-weight:500">${esc(p.mrn)}</span></b>
+    <span>${sex(p.gender)}, ${p.age}. ${p.earlierStays ? `Here before: ${plural(p.earlierStays, 'stay', 'stays')} on file.` : 'First visit.'}</span>
+    <span>${esc(p.reason)}, ${inr(p.deposit)} deposit.</span></span>
+    <span class="code" aria-hidden="true" style="--b1:${b[0]}px;--b2:${b[0] + b[1]}px;--b3:${b[0] + b[1] + b[2]}px;--b4:${b[0] + b[1] + b[2] + b[3]}px"></span></div>`;
+}
+function roomHead(r) {
+  const w = WARD[r.type];
+  return `<div class="roomhead"><span class="chip" style="--wc:${w.c}" aria-hidden="true">${r.floor}</span>
+    <div><h3>Room ${r.no}</h3><p>${w.room} on floor ${r.floor}, ${inr(r.rate)} a night.</p></div></div>`;
+}
+function quote(b) {
+  const due = b.balance >= 0 ? ['Balance due', inr(b.balance)] : ['Refund due', inr(-b.balance)];
+  return `<dl class="quote"><div class="qh"><dt>If they left now</dt><dd></dd></div>
+    <div><dt>Room, ${plural(b.n, 'night', 'nights')} × ${inr(b.lines[0].unit)}</dt><dd>${inr(b.room)}</dd></div>
+    ${b.charges ? `<div><dt>Extras (${b.charges})</dt><dd>${inr(b.extras)}</dd></div>` : ''}
+    <div><dt>Deposit paid</dt><dd>−${inr(b.deposit)}</dd></div>
+    <div class="due"><dt>${due[0]}</dt><dd>${due[1]}</dd></div></dl>`;
+}
+function receipt(x) {
+  const { b, st, issued } = x;
+  const date = issued.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `<div class="receipt" role="img" aria-label="Invoice for admission ${st.id}: ${b.balance >= 0 ? 'balance due ' + money(b.balance) : 'refund due ' + money(-b.balance)}">
+    <div class="r-title">HEALTH HAVEN — INVOICE</div>
+    <div class="r-meta">Admission #${st.id}&nbsp;&nbsp; Issued ${date}</div><hr>
+    ${b.lines.map(l => `<div class="r-line"><span>${esc(l.desc)}</span><span class="q">${l.qty} x ${money(l.unit)}</span><span class="t">${money(l.total)}</span></div>`).join('')}
+    <hr><div class="r-row"><span>Room &amp; board</span><span>${money(b.room)}</span></div>
+    <div class="r-row"><span>Extras</span><span>${money(b.extras)}</span></div>
+    <div class="r-row"><span>Gross total</span><span>${money(b.gross)}</span></div>
+    <div class="r-row"><span>Less deposit</span><span>${money(b.deposit)}</span></div><hr>
+    <div class="r-row r-due ${b.balance < 0 ? 'refund' : ''}"><span>${b.balance < 0 ? 'REFUND DUE TO PATIENT' : 'BALANCE DUE'}</span><span>${money(Math.abs(b.balance))}</span></div></div>`;
+}
+const verdict = (kind, title, code) => `<div class="verdict ${kind}">${icon[kind]}<div><b>${title}</b>${code ? `<code>${esc(code)}</code>` : ''}</div></div>`;
+const nextBtn = (label) => {
+  const n = nextStep();
+  return n > 4 ? `<button class="btn primary" type="button" data-act="step" data-step="5">${label || 'Finish'}</button>`
+    : `<button class="btn primary" type="button" data-act="step" data-step="${n}">Next: ${NEXT[n - 1]}</button>`;
+};
+
+function show(view, last) {
+  S.view = view; S.last = last || null;
+  if (view === 'guide') { $$('.win.sel, .amb.sel').forEach(el => el.classList.remove('sel')); S.sel = null; }
+  renderSteps();
+  $('#deskBody').innerHTML = body();
+}
+
+function body() {
+  const p = S.queue[0], x = S.last;
+  switch (S.view) {
+    case 'guide': {
+      if (S.step === 1 && !free().length) return `<h3>Every room is taken</h3><p>Discharge someone first to free a room.</p>`;
+      if (S.step === 1) return `<h3>Give the next patient a bed</h3><p>Click any dark window on the building, or let the desk pick a free room.</p>
+        ${wristband(p, 'Next:')}<div class="actions"><button class="btn primary" type="button" data-act="pick-free">${icon.bed}Pick a free room</button></div>`;
+      if (S.step === 2) { const t = pickTaken();
+        if (!t) return `<h3>Every room is empty</h3><p>Admit someone first, then try to put a second patient in the same room.</p>`;
+        return `<h3>Now try to break a rule</h3><p>Put the next patient in a room that is already lit. A desk would never mean to; a busy one might.</p>
+        ${wristband(p, 'Next:')}<div class="actions"><button class="btn primary" type="button" data-act="try-taken" data-room="${t.no}">Admit them to ${t.no}</button></div>
+        <p class="small" style="margin-top:12px">Or click any lit window, then choose to admit.</p>`; }
+      if (S.step === 3) return `<h3>Let a night pass</h3><p>A stay is billed by the night. Move the clock on and every running bill grows by its room's nightly rate.</p>
+        <div class="actions"><button class="btn primary" type="button" data-act="night">${icon.moon}Let a night pass</button></div>`;
+      if (S.step === 4) { const t = pickBill();
+        if (!t) return `<h3>Every room is empty</h3><p>Admit someone first; then there is someone to discharge.</p>`;
+        return `<h3>Discharge someone</h3><p>Click a lit window and discharge that patient. The bill prints right here, and their record stays on file.</p>
+        <div class="actions"><button class="btn primary" type="button" data-act="pick-bill" data-room="${t.no}">${icon.print}Discharge ${t.no} for me</button></div>`; }
+      return `<h3>That's the whole loop</h3><p>The hospital is yours now. Admit and discharge anyone, let more nights pass, or send an ambulance from the emergency bay.</p>
+        <p class="small">Every rule here is one the Java app enforces; the refusals quote its own error messages.</p>
+        <div class="actions"><button class="btn ghost" type="button" data-act="reset">Start over</button></div>`;
+    }
+    case 'room': {
+      const r = S.rooms.get(x.no);
+      if (!r.stay) return `${roomHead(r)}<span class="state free">Free</span>
+        <p>No active admission points at this room, so its window is dark.</p>${wristband(p, 'Next:')}
+        <div class="actions"><button class="btn primary" type="button" data-act="admit" data-room="${r.no}">${icon.bed}Admit ${esc(p.initials)} to ${r.no}</button></div>`;
+      const st = r.stay, b = bill(r);
+      return `${roomHead(r)}<span class="state taken">${esc(st.initials)} is here, ${plural(b.n, 'night', 'nights')} so far</span>
+        <p style="margin-bottom:10px">${sex(st.gender)}, ${st.age}, ${esc(st.mrn)}. ${esc(st.reason)}.</p>${quote(b)}
+        <div class="actions"><button class="btn primary" type="button" data-act="discharge" data-room="${r.no}">${icon.print}Discharge and print the bill</button>
+          <button class="btn ghost" type="button" data-act="admit" data-room="${r.no}">Admit ${esc(p.initials)} here too</button></div>
+        <button class="textbtn" type="button" data-act="as-doctor" data-room="${r.no}">Try to discharge as Dr. Iyer instead</button>`;
+    }
+    case 'admitted': {
+      const r = S.rooms.get(x.no);
+      return `${verdict('ok', `Admitted ${esc(x.who.initials)} to room ${x.no}`)}
+        <p>The window lit up because an admission now points at the room. Nothing set an "occupied" flag:
+        occupancy is worked out from the admissions, so it can't drift.</p>${quote(bill(r))}<div class="actions">${nextBtn()}</div>`;
+    }
+    case 'refused': {
+      if (x.kind === 'doctor') return `${verdict('no', 'Refused', x.message)}
+        <p>A doctor's account can see stays and record charges, but not discharge. The role is checked before the
+        discharge runs, so hiding a button is not what stops it.</p>
+        <div class="actions"><button class="btn ghost" type="button" data-act="room" data-room="${x.key}">Back to ${x.key}</button>${nextBtn()}</div>`;
+      if (x.kind === 'amb') return `${verdict('no', 'Refused', x.message)}
+        <p>${S.ambs[x.key].status === 'MAINTENANCE' ? 'It is in the workshop, so the desk cannot send it anywhere.'
+          : 'One ambulance, one open call. The database backs this up with a unique index on open dispatches.'}</p>
+        <div class="actions"><button class="btn ghost" type="button" data-act="amb" data-amb="${x.key}">Back to the ambulance</button></div>`;
+      return `${verdict('no', 'Refused', x.message)}
+        <p>That is the admission service's own message. Under it sits the database's rule, a unique index on active
+        admissions, so even a screen with a bug can't put two patients in one bed.</p>
+        <div class="actions">${nextBtn()}<button class="btn ghost" type="button" data-act="room" data-room="${x.key}">Back to ${x.key}</button></div>`;
+    }
+    case 'night':
+      return `${verdict('ok', `${plural(S.night, 'night has', 'nights have')} passed`)}
+        <p>${x.grew === x.lit ? `All ${x.lit} lit rooms are one night longer, so every running bill went up by its room's nightly rate.`
+          : `${x.grew} of the ${x.lit} lit rooms are one night longer, and their bills went up by the nightly rate.
+          ${esc(x.same.join(', '))} came in tonight: a part night already bills as a whole one, so ${x.same.length === 1 ? 'that bill stays' : 'those bills stay'} at one night for now.`}
+        Click a lit window to see one.</p><div class="actions">${nextBtn()}
+        <button class="btn ghost" type="button" data-act="night">${icon.moon}Another night</button></div>`;
+    case 'receipt': {
+      const { b, st, no } = x;
+      const same = b.naive === b.balance;
+      return `${verdict('ok', `Discharged ${esc(st.initials)} from ${no}`)}${receipt(x)}
+        <p class="naive">${icon.warn}<span>${same
+          ? `The obvious formula, rate − deposit, happens to agree here: one night and no extras. Let a few nights pass and it won't.`
+          : `The obvious formula, rate − deposit, would have printed <b>${inr(b.naive)}</b> due for this stay. It never sees the ${plural(b.n, 'night', 'nights')}${b.charges ? ' or the extras' : ''}.`}</span></p>
+        <p class="small">${esc(st.initials)}'s record stays on file, and they are back in the queue as a returning patient. Room ${no} is dark again.</p>
+        <div class="actions">${nextBtn('See what else to try')}</div>`;
+    }
+    case 'amb': {
+      const a = S.ambs[x.i];
+      const st = a.status === 'AVAILABLE' ? ['ready', 'In the bay'] : a.status === 'DISPATCHED' ? ['taken', 'Out on a call'] : ['away', 'In maintenance'];
+      const lead = x.note === 'sent' ? verdict('ok', `${a.vehicle} is on its way`) : x.note === 'back' ? verdict('ok', `${a.vehicle} is back in the bay`) : '';
+      return `${lead}<div class="roomhead"><span class="chip" style="--wc:var(--w4)" aria-hidden="true">${icon.amb}</span>
+        <div><h3>Ambulance ${a.vehicle}</h3><p>Driver: ${esc(a.driver)}.</p></div></div>
+        <span class="state ${st[0]}">${st[1]}</span>
+        <p>${a.status === 'DISPATCHED' ? 'Try sending it again while it is still out.' : a.status === 'MAINTENANCE' ? 'Try sending it anyway.' : 'Send it to an emergency, then try sending it a second time.'}</p>
+        <div class="actions"><button class="btn primary" type="button" data-act="dispatch" data-amb="${x.i}">${icon.amb}Send to an emergency</button>
+        ${a.status === 'DISPATCHED' ? `<button class="btn ghost" type="button" data-act="recall" data-amb="${x.i}">Call it back</button>` : ''}</div>`;
+    }
+  }
+  return '';
+}
+
+const free = () => [...S.rooms.values()].filter(r => !r.stay && !r.out);
+const taken = () => [...S.rooms.values()].filter(r => r.stay);
+const middleOf = list => {
+  const g = list.filter(r => r.floor === 1), pool = g.length ? g : list;
+  return pool.reduce((best, r) => Math.abs(+r.no.slice(-2) - 6.5) < Math.abs(+best.no.slice(-2) - 6.5) ? r : best, pool[0]);
+};
+const pickFree = () => middleOf(free());
+const pickTaken = () => middleOf(taken());
+const pickBill = () => !taken().length ? null : taken().reduce((best, r) => { const b = bill(r), bb = bill(best);
+  return (b.balance - b.naive) > (bb.balance - bb.naive) ? r : best; }, taken()[0]);
+
+function say(msg) { const el = $('#announce'); el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 30); }
+
+/* ---------- input ---------- */
+function act(a, d) {
+  switch (a) {
+    case 'step': S.step = +d.step; return show('guide');
+    case 'pick-free': { if (!S.queue.length) return; const r = pickFree(); if (!r) return; select({ kind: 'room', key: r.no }); return; }
+    case 'try-taken': select({ kind: 'room', key: d.room }); return admit(d.room);
+    case 'admit': return admit(d.room);
+    case 'room': return select({ kind: 'room', key: d.room });
+    case 'night': return passNight();
+    case 'pick-bill': select({ kind: 'room', key: d.room }); return discharge(d.room);
+    case 'discharge': return discharge(d.room);
+    case 'as-doctor': return discharge(d.room, true);
+    case 'amb': return select({ kind: 'amb', key: +d.amb });
+    case 'dispatch': return dispatch(+d.amb);
+    case 'recall': return recall(+d.amb);
+    case 'reset': stopTour(); S = fresh(); paintAll(false); clock(); return show('guide');
+    case 'tour': return tour();
+  }
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act],[data-step],[data-goto],.win,.amb');
+  if (!t) return;
+  if (e.isTrusted && !(t.dataset.act === 'tour')) stopTour();
+  if (t.matches('.win')) return select({ kind: 'room', key: t.dataset.room }, { reveal: true });
+  if (t.matches('.amb')) return select({ kind: 'amb', key: +t.dataset.amb }, { reveal: true });
+  if (t.dataset.goto) { S.step = +t.dataset.goto; show('guide'); $('#desk').scrollIntoView({ behavior: motionOK() ? 'smooth' : 'auto', block: 'center' }); $('#desk').focus({ preventScroll: true }); return; }
+  if (t.dataset.act) return act(t.dataset.act, t.dataset);
+  if (t.dataset.step) return act('step', t.dataset);
 });
 
-const tr = DATA.admissionsTrend;
-new Chart(document.getElementById('trendChart'), {
-  type:'line',
-  data:{ labels: tr.map(t=>t.date.slice(5)), datasets:[{ label:'Admissions', data: tr.map(t=>t.count),
-    borderColor:css('--s1'), backgroundColor:'transparent', borderWidth:2, pointRadius:0,
-    pointHoverRadius:5, tension:.25 }]},
-  options:{ maintainAspectRatio:false, responsive:true, interaction:{mode:'index',intersect:false},
-    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>`${c.parsed.y} admission${c.parsed.y===1?'':'s'}` } } },
-    scales:{ x:{ grid:{display:false}, ticks:{color:css('--muted'),font:{size:10},maxTicksLimit:6} },
-             y:{ grid:{color:css('--grid')}, ticks:{color:css('--muted'),font:{size:11},precision:0}, beginAtZero:true } } }
+// Arrow keys move between rooms, like walking the corridor: one tab stop for the whole building.
+$('#bldg').addEventListener('keydown', e => {
+  const cur = e.target.closest('.win');
+  if (!cur) return;
+  const rows = $$('.floor .wins').map(w => [...w.children]);
+  const fi = rows.findIndex(r => r.includes(cur)), ri = rows[fi].indexOf(cur);
+  let next = null;
+  const nearest = row => { const x = cur.getBoundingClientRect(); const cx = x.left + x.width / 2;
+    return row.reduce((a, b) => Math.abs(b.getBoundingClientRect().left + x.width / 2 - cx) < Math.abs(a.getBoundingClientRect().left + x.width / 2 - cx) ? b : a); };
+  if (e.key === 'ArrowLeft') next = rows[fi][ri - 1];
+  else if (e.key === 'ArrowRight') next = rows[fi][ri + 1];
+  else if (e.key === 'ArrowUp' && fi > 0) next = nearest(rows[fi - 1]);
+  else if (e.key === 'ArrowDown' && fi < rows.length - 1) next = nearest(rows[fi + 1]);
+  else if (e.key === 'Home') next = rows[fi][0];
+  else if (e.key === 'End') next = rows[fi][rows[fi].length - 1];
+  if (!next) return;
+  e.preventDefault();
+  $$('.win').forEach(w => { w.tabIndex = -1; });
+  next.tabIndex = 0; next.focus();
 });
 
-const rev = DATA.revenueMix;
-new Chart(document.getElementById('revenueChart'), {
-  type:'bar',
-  data:{ labels: rev.map(r=>r.kind), datasets:[{ data: rev.map(r=>r.rupees),
-    backgroundColor:[css('--s1'),css('--s2'),css('--s3'),css('--s4'),css('--s5')],
-    borderRadius:4, borderSkipped:false }]},
-  options:{ maintainAspectRatio:false, responsive:true, indexAxis:'y',
-    layout:{ padding:{ right:52 } },
-    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>inr(c.parsed.x) } } },
-    scales:{ x:{ grid:{color:css('--grid')}, ticks:{color:css('--muted'),font:{size:10},callback:v=>inrShort(v)} },
-             y:{ grid:{display:false}, ticks:{color:css('--ink-2'),font:{size:11}} } } },
-  plugins:[{ id:'dl', afterDatasetsDraw(c){ const {ctx}=c; ctx.save();
-    ctx.font='500 11px "IBM Plex Mono", monospace'; ctx.fillStyle=css('--ink-2'); ctx.textBaseline='middle';
-    c.getDatasetMeta(0).data.forEach((bar,i) => ctx.fillText(inrShort(rev[i].rupees), bar.x+8, bar.y));
-    ctx.restore(); } }]
-});
-
-const pay = DATA.payroll;
-new Chart(document.getElementById('payChart'), {
-  type:'bar',
-  data:{ labels: pay.map(p=>p.role), datasets:[{ data: pay.map(p=>p.monthlyRupees),
-    backgroundColor:css('--s5'), borderRadius:4, borderSkipped:false }]},
-  options:{ maintainAspectRatio:false, responsive:true, indexAxis:'y',
-    plugins:{ legend:{display:false}, tooltip:{ callbacks:{
-      title: it => `${pay[it[0].dataIndex].role} × ${pay[it[0].dataIndex].count}`,
-      label: c => inr(c.parsed.x) } } },
-    scales:{ x:{ grid:{color:css('--grid')}, ticks:{color:css('--muted'),font:{size:10},callback:v=>inrShort(v)} },
-             y:{ grid:{display:false}, ticks:{color:css('--ink-2'),font:{size:11}} } } }
-});
-
-const dept = DATA.departmentLoad;
-new Chart(document.getElementById('deptChart'), {
-  type:'bar',
-  data:{ labels: dept.map(d=>d.department), datasets:[{ data: dept.map(d=>d.active),
-    backgroundColor:css('--s2'), borderRadius:4, borderSkipped:false }]},
-  options:{ maintainAspectRatio:false, responsive:true, indexAxis:'y',
-    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>`${c.parsed.x} admitted` } } },
-    scales:{ x:{ grid:{color:css('--grid')}, ticks:{color:css('--muted'),font:{size:10},precision:0} },
-             y:{ grid:{display:false}, ticks:{color:css('--ink-2'),font:{size:11}} } } }
-});
-
-const BI = DATA.billingImpact;
-new Chart(document.getElementById('impactChart'), {
-  type:'bar',
-  data:{ labels:['Health Haven','Naive formula'], datasets:[{ data:[BI.correctGrossRupees, BI.naiveGrossRupees],
-    backgroundColor:[css('--s1'), css('--s6')], borderRadius:4, borderSkipped:false, barThickness:34 }]},
-  options:{ maintainAspectRatio:false, responsive:true, indexAxis:'y',
-    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>inr(c.parsed.x) } } },
-    scales:{ x:{ grid:{color:css('--grid')}, ticks:{color:css('--muted'),font:{size:10},callback:v=>inrShort(v)} },
-             y:{ grid:{display:false}, ticks:{color:css('--ink-2'),font:{size:11}} } } },
-  plugins:[{ id:'dl2', afterDatasetsDraw(c){ const {ctx}=c; ctx.save();
-    ctx.font='500 11px "IBM Plex Mono", monospace'; ctx.fillStyle=css('--ink-2'); ctx.textBaseline='middle';
-    c.getDatasetMeta(0).data.forEach((bar,i) =>
-      ctx.fillText(inrShort([BI.correctGrossRupees, BI.naiveGrossRupees][i]), bar.x+8, bar.y));
-    ctx.restore(); } }]
-});
-
-/* ---------- audit table ---------- */
-document.getElementById('auditBody').innerHTML = DATA.audit.map(f => `
-  <tr><td class="f">${f.id}</td><td><b>${f.title}</b></td>
-    <td class="bad">${f.naive}</td><td class="good-t">${f.healthHaven}</td>
-    <td style="color:var(--ink-2)">${f.impact}</td></tr>`).join('');
+/* ---------- a guided run, for anyone who would rather watch ---------- */
+let touring = 0;
+function stopTour() { touring = 0; }
+async function tour() {
+  const me = ++touring;
+  const live = () => touring === me;
+  const beat = async ms => { await sleep(motionOK() ? ms : Math.min(ms, 900)); return live(); };
+  $('#hospital').scrollIntoView({ behavior: motionOK() ? 'smooth' : 'auto', block: 'center' });
+  if (!await beat(700)) return;
+  S.step = 1; show('guide');
+  if (!await beat(1300)) return;
+  const f = pickFree(); select({ kind: 'room', key: f.no });
+  if (!await beat(1500)) return;
+  admit(f.no);
+  if (!await beat(2600)) return;
+  const t = pickTaken(); select({ kind: 'room', key: t.no });
+  if (!await beat(1400)) return;
+  admit(t.no);
+  if (!await beat(3000)) return;
+  S.step = 3; show('guide');
+  if (!await beat(1100)) return;
+  await passNight();
+  if (!await beat(2600)) return;
+  const d = pickBill(); select({ kind: 'room', key: d.no });
+  if (!await beat(1800)) return;
+  discharge(d.no);
+  touring = 0;
+}
 
 /* ---------- theme ---------- */
-document.getElementById('themeBtn').addEventListener('click', () => {
-  const cur = document.documentElement.getAttribute('data-theme')
-    || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  localStorage.setItem('hh-theme', cur === 'dark' ? 'light' : 'dark');
-  location.reload();   // Chart.js reads its colours once, at construction.
+const themeBtn = $('#themeBtn');
+const theme = () => document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+function paintThemeBtn() {
+  const dark = theme() === 'dark';
+  themeBtn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+  $('.i-moon', themeBtn).style.display = dark ? 'none' : '';
+  $('.i-sun', themeBtn).style.display = dark ? '' : 'none';
+}
+themeBtn.addEventListener('click', () => {
+  const next = theme() === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('hh-theme', next); } catch (e) {}
+  paintThemeBtn();
 });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintThemeBtn);
+
+/* ---------- the night sky ---------- */
+(function stars() {
+  const svg = $('#stars'); let seed = 11;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const box = svg.getBoundingClientRect(), w = Math.round(box.width) || 1440, h = Math.round(box.height) || 600;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.innerHTML = Array.from({ length: Math.min(90, Math.round(w * h / 9000)) }, () =>
+    `<circle cx="${(rand() * w).toFixed(1)}" cy="${(rand() * h).toFixed(1)}" r="${(0.5 + rand() * 0.9).toFixed(2)}" opacity="${(0.25 + rand() * 0.6).toFixed(2)}"/>`).join('');
+})();
+
+/* ---------- how it works: the bill, drawn from a real stay ---------- */
+(function billArt() {
+  const IV = DATA.sampleInvoice;
+  const rows = IV.lines.map((l, i) => `<div class="r"><span class="cls ${i === 0 ? 'room' : 'extra'}">${i === 0 ? 'RoomCharge' : 'ExtraCharge'}</span>
+    <span>${esc(i === 0 ? `${l.quantity} nights × ${inr(l.unitRupees)}` : l.description)}</span><span>${inr(l.totalRupees)}</span></div>`).join('');
+  $('#billArt').innerHTML = `<div class="mini-bill">${rows}<hr>
+    <div class="r sum"><span>Less deposit</span><span>−${inr(IV.depositRupees)}</span></div>
+    <div class="r sum tot"><span>Balance due</span><span>${inr(IV.balanceRupees)}</span></div></div>`;
+  const doc = DATA.staff.find(s => s.name === 'Dr. Meera Iyer') || DATA.staff.find(s => s.type === 'Doctor');
+  if (doc) $('#payLine').innerHTML = `Staff pay works the same way. Each kind of staff member works out its own allowance:
+    ${esc(doc.name)}'s ${inr(doc.baseRupees)} base comes to ${inr(doc.payRupees)} a month, and the payroll never has to ask
+    whether it is paying a doctor or a nurse.`;
+})();
+
+/* ---------- why: the bill that forgets the nights ---------- */
+(function whyChart() {
+  const IV = DATA.sampleInvoice;
+  const rate = IV.lines[0].unitRupees, extras = IV.extrasTotalRupees, dep = IV.depositRupees;
+  const correct = n => n * rate + extras - dep, naive = () => rate - dep;
+  $('#sampleLine').textContent = `Take a real stay from the seeded hospital: admission #${IV.admissionId}, ${IV.ward.toLowerCase()} room ${IV.room}, ` +
+    `${inr(rate)} a night, ${inr(extras)} of extras and a ${inr(dep)} deposit. It lasted ${IV.nights} nights. Slide it.`;
+  const maxN = 30, yMax = Math.ceil(correct(maxN) / 50000) * 50000, yMin = Math.min(-20000, naive() * 2);
+  const ticks = []; for (let v = 0; v <= yMax; v += 50000) ticks.push(v);
+  const lakh = v => v === 0 ? '₹0' : v < 100000 ? `₹${v / 1000}k` : `₹${+(v / 100000).toFixed(1)}L`;
+  const svg = $('#chartSvg'), input = $('#nights'), tip = $('#chartTip');
+  let W, H, m, x, y;
+  function layout() {
+    W = Math.max(280, Math.round(svg.getBoundingClientRect().width) || 600);
+    const narrow = W < 520;
+    H = narrow ? 250 : 300;
+    m = { l: 50, r: narrow ? 14 : 112, t: 14, b: 36 };
+    x = n => m.l + (n - 1) / (maxN - 1) * (W - m.l - m.r);
+    y = v => m.t + (yMax - v) / (yMax - yMin) * (H - m.t - m.b);
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.innerHTML = `
+      ${ticks.map(v => `<line class="gl" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text class="tick" x="${m.l - 10}" y="${y(v) + 4}" text-anchor="end">${lakh(v)}</text>`).join('')}
+      <line class="zero" x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}"/>
+      ${[1, 7, 14, 21, 30].map(n => `<text class="tick" x="${x(n)}" y="${H - 12}" text-anchor="middle">${n}</text>`).join('')}
+      <text class="tick" x="${narrow ? m.l : W - m.r + 26}" y="${narrow ? H - 12 : H - 12}" dx="${narrow ? -44 : 0}" text-anchor="start">${narrow ? '' : 'nights'}</text>
+      <path class="la" d="M${x(1)} ${y(correct(1))} L${x(maxN)} ${y(correct(maxN))}"/>
+      <path class="lb" d="M${x(1)} ${y(naive())} L${x(maxN)} ${y(naive())}"/>
+      ${narrow ? '' : `<text class="dl" x="${x(maxN) + 10}" y="${y(correct(maxN)) + 4}">Health Haven</text>
+      <text class="dl" x="${x(maxN) + 10}" y="${y(naive()) + 4}">rate − deposit</text>`}
+      <line class="xhair" id="xh" y1="${m.t}" y2="${H - m.b}"/>
+      <circle class="fa ring" id="ma" r="6"/><circle class="fb ring" id="mb" r="6"/>
+      <rect id="hit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
+    $('#hit').addEventListener('pointermove', fromPointer);
+    $('#hit').addEventListener('pointerdown', fromPointer);
+    $('#hit').addEventListener('pointerleave', () => { tip.style.opacity = 0; });
+  }
+  $('#chartDesc').textContent = `Line chart of the bill against nights stayed, from 1 to 30. Health Haven's bill rises by ${inr(rate)} for every night, ` +
+    `from ${inr(correct(1))} to ${inr(correct(maxN))}. The rate − deposit bill stays flat at ${inr(naive())} however long the stay.`;
+  $('#chartTable').innerHTML = `<thead><tr><th>Nights</th><th>Health Haven</th><th>rate − deposit</th></tr></thead><tbody>` +
+    [1, 7, 14, 21, 30].map(n => `<tr><td>${n}</td><td>${inr(correct(n))}</td><td>${inr(naive())}</td></tr>`).join('') + '</tbody>';
+  function draw(n, showTip) {
+    $('#xh').setAttribute('x1', x(n)); $('#xh').setAttribute('x2', x(n));
+    $('#ma').setAttribute('cx', x(n)); $('#ma').setAttribute('cy', y(correct(n)));
+    $('#mb').setAttribute('cx', x(n)); $('#mb').setAttribute('cy', y(naive()));
+    $('#nightsOut').textContent = plural(n, 'night', 'nights');
+    $('#roA').textContent = inr(correct(n)); $('#roAsub').textContent = `${n} × ${inr(rate)} + ${inr(extras)} − ${inr(dep)}`;
+    $('#roB').textContent = inr(naive()); $('#roBsub').textContent = `${inr(rate)} − ${inr(dep)}, whatever the nights`;
+    if (showTip) {
+      const box = svg.getBoundingClientRect(), cb = $('#chart').getBoundingClientRect(), k = box.width / W;
+      tip.innerHTML = `<b>${plural(n, 'night', 'nights')}</b><div><i style="background:var(--chart-a)"></i>Health Haven ${inr(correct(n))}</div><div><i style="background:var(--chart-b)"></i>rate − deposit ${inr(naive())}</div>`;
+      const px = box.left - cb.left + x(n) * k, py = box.top - cb.top + y(correct(n)) * k;
+      const flip = px > cb.width - 220;
+      tip.style.left = (flip ? px - 196 : px + 16) + 'px'; tip.style.top = Math.max(8, py - 10) + 'px'; tip.style.opacity = 1;
+    }
+  }
+  function fromPointer(e) {
+    const box = svg.getBoundingClientRect(), k = box.width / W;
+    const n = Math.round(1 + ((e.clientX - box.left) / k - m.l) / (W - m.l - m.r) * (maxN - 1));
+    const c = Math.min(maxN, Math.max(1, n)); input.value = c; draw(c, true);
+  }
+  input.addEventListener('input', () => draw(+input.value, false));
+  layout();
+  draw(+input.value, false);
+  let lastW = W;
+  new ResizeObserver(() => { const w = Math.round(svg.getBoundingClientRect().width);
+    if (w && Math.abs(w - lastW) > 4) { lastW = w; layout(); draw(+input.value, false); } }).observe($('#chart'));
+
+  const BI = DATA.billingImpact;
+  $('#tallyTitle').textContent = `Replayed across all ${BI.invoices} stays this hospital has billed`;
+  const max = Math.max(BI.correctGrossRupees, BI.naiveGrossRupees);
+  $('#bars').innerHTML = [
+    ['What the stays cost', BI.correctGrossRupees, 'var(--chart-a)'],
+    ['One night\'s rate per stay', BI.naiveGrossRupees, 'var(--chart-b)'],
+  ].map(([l, v, c]) => `<div class="barrow"><span class="bl">${l}</span><div class="track">
+      <span class="fill" style="width:calc((100% - 120px) * ${(v / max).toFixed(4)});background:${c}"></span><span class="v">${inr(v)}</span></div></div>`).join('');
+  $('#tallyNote').textContent = `The obvious formula charges one night's rate per stay: ${inr(BI.naiveGrossRupees)} for stays that cost ` +
+    `${inr(BI.correctGrossRupees)}, so ${BI.shortfallPct}% of the money never reaches a bill. Take the deposit off, and all ` +
+    `${BI.negativeBills} bills show the hospital owing the patient.`;
+})();
+
+/* ---------- start ---------- */
+$('#genLine').textContent = `The hospital on this page is the state the app exported on ${EXPORTED.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+S = fresh();
+buildBuilding();
+paintAll(true);
+clock();
+paintThemeBtn();
+show('guide');
+})();
 </script>
 </body>
 </html>

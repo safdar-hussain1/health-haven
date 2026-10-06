@@ -2,12 +2,15 @@ package com.healthhaven.report;
 
 import com.healthhaven.HealthHaven;
 import com.healthhaven.domain.Admission;
+import com.healthhaven.domain.Ambulance;
 import com.healthhaven.domain.Money;
+import com.healthhaven.domain.Patient;
 import com.healthhaven.domain.Room;
 import com.healthhaven.domain.RoomType;
 import com.healthhaven.domain.StaffMember;
 import com.healthhaven.domain.StaffRole;
 import com.healthhaven.domain.billing.ChargeKind;
+import com.healthhaven.domain.billing.ExtraCharge;
 import com.healthhaven.repository.InvoiceRepository;
 import com.healthhaven.service.ReportingService;
 
@@ -56,6 +59,8 @@ public final class DashboardExporter {
         root.put("sampleInvoice", sampleInvoice());
         root.put("billingImpact", billingImpact());
         root.put("audit", new AuditReport().asData());
+        root.put("waiting", waiting());
+        root.put("ambulances", ambulances());
 
         Path parent = outputFile.toAbsolutePath().getParent();
         if (parent != null) {
@@ -104,10 +109,83 @@ public final class DashboardExporter {
                 long nights = a.billableNights(Instant.now());
                 bed.put("nights", nights);
                 bed.put("diagnosis", a.diagnosis());
+                stayDetails(bed, a);
             }
             beds.add(bed);
         }
         return beds;
+    }
+
+    /**
+     * What the desk would need to discharge this stay: who it is (initials only,
+     * as a ward board shows them), the deposit, every extra charged so far, and
+     * the balance the system itself quotes right now. The page prices a discharge
+     * from these parts, so the quote is exported alongside them to check against.
+     */
+    private void stayDetails(Map<String, Object> bed, Admission a) {
+        Patient patient = app.patients().findById(a.patientId()).orElseThrow();
+        bed.put("admissionId", a.id());
+        bed.put("mrn", patient.mrn());
+        bed.put("initials", initials(patient.fullName()));
+        bed.put("gender", patient.gender().name());
+        bed.put("age", patient.ageOn(LocalDate.now(ZoneOffset.UTC)));
+        bed.put("earlierStays", app.admissions().findByPatient(patient.id()).size() - 1);
+        bed.put("depositRupees", rupees(a.deposit()));
+        List<Map<String, Object>> charges = new ArrayList<>();
+        for (ExtraCharge charge : app.charges().findByAdmission(a.id())) {
+            Map<String, Object> line = new LinkedHashMap<>();
+            line.put("kind", charge.kind().label());
+            line.put("description", charge.description());
+            line.put("quantity", charge.quantity());
+            line.put("unitRupees", rupees(charge.unitAmount()));
+            charges.add(line);
+        }
+        bed.put("charges", charges);
+        bed.put("quotedBalanceRupees", rupees(app.admissionService().quote(a).balanceDue()));
+    }
+
+    /**
+     * Registered patients with no active stay, the people the desk could admit
+     * next. In the seeded hospital every one of them has been discharged before,
+     * so their earlier stays are still on file.
+     */
+    private List<Map<String, Object>> waiting() {
+        List<Map<String, Object>> out = new ArrayList<>();
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        for (Patient p : app.patients().findAll()) {
+            if (app.admissions().findActiveByPatient(p.id()).isPresent()) {
+                continue;
+            }
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("mrn", p.mrn());
+            row.put("initials", initials(p.fullName()));
+            row.put("gender", p.gender().name());
+            row.put("age", p.ageOn(today));
+            row.put("earlierStays", app.admissions().findByPatient(p.id()).size());
+            out.add(row);
+        }
+        return out;
+    }
+
+    private List<Map<String, Object>> ambulances() {
+        List<Map<String, Object>> out = new ArrayList<>();
+        for (Ambulance amb : app.ambulanceService().fleet()) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("vehicle", amb.vehicleNo());
+            row.put("driver", amb.driverName());
+            row.put("status", amb.status().name());
+            out.add(row);
+        }
+        return out;
+    }
+
+    /** "Anil Rao" becomes "A.R." — a ward board names patients by their initials. */
+    private static String initials(String fullName) {
+        StringBuilder out = new StringBuilder();
+        for (String part : fullName.trim().split("\\s+")) {
+            out.append(Character.toUpperCase(part.charAt(0))).append('.');
+        }
+        return out.toString();
     }
 
     private List<Map<String, Object>> occupancyByType() {

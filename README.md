@@ -4,7 +4,7 @@ A hospital management system in Java: patients, admissions, wards, billing, staf
 ambulance dispatch and an append-only audit log — behind a layered domain model, a SQLite
 database, and three interfaces (desktop app, CLI, JSON API).
 
-**[▶ Live dashboard](https://safdar-hussain1.github.io/health-haven/)** · 35 tests · zero setup (`mvn package && java -jar target/health-haven.jar`)
+**[▶ Live demo](https://safdar-hussain1.github.io/health-haven/)** · 35 tests · zero setup (`mvn package && java -jar target/health-haven.jar`)
 
 <p align="center">
   <img src="docs/screenshots/desktop-dashboard.png" width="49%" alt="The desktop dashboard: stat tiles, admissions by department, beds by ward type, revenue by charge type">
@@ -42,7 +42,13 @@ a Swing desktop client, a console, and a token-authenticated JSON API.
 Numbers below come from a deterministic seeded hospital (58 patients over six months, 30 beds,
 15 staff) and are produced by the application itself — `java -jar target/health-haven.jar export`
 writes them to [`docs/data/dashboard.json`](docs/data/dashboard.json), which is the only thing
-the live dashboard reads. Nothing on the dashboard or in this README is typed in by hand.
+the live demo reads. Nothing on the demo page or in this README is typed in by hand.
+
+The live demo starts from that file: every bed, every current stay with its deposit and
+recorded charges, and the patients waiting for a bed. Its front desk then runs the same rules
+in the browser — admit, refuse a taken bed, bill by the night, discharge and print the invoice —
+and `python3 scripts/test_dashboard_data.py` checks that each stay's parts add up to the
+balance the application itself quotes.
 
 **Hospital at a glance**
 
@@ -174,7 +180,7 @@ health-haven/
 │   └── Main.java        entry point / dispatcher
 ├── src/main/resources/db/schema.sql
 ├── src/test/java/       35 tests, incl. the naive-vs-Health-Haven comparison
-└── docs/                dashboard (index.html + data/dashboard.json), design notes
+└── docs/                live demo (index.html + data/dashboard.json), design notes
 ```
 
 Further reading: [`docs/OOP_DESIGN.md`](docs/OOP_DESIGN.md) (the four pillars, mapped to real
@@ -265,7 +271,8 @@ Health Haven against the same inputs.
 ## Tech stack
 
 Java 21 · Maven · SQLite (`sqlite-jdbc`) · bcrypt (`at.favre.lib`) · Swing + FlatLaf ·
-JUnit 5 + AssertJ · the JDK's built-in `HttpServer` for the API · Chart.js on the dashboard.
+JUnit 5 + AssertJ · the JDK's built-in `HttpServer` for the API · plain HTML, CSS and JavaScript for
+the live demo (no framework, no chart library).
 
 ## Licence
 
